@@ -11,6 +11,23 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
+-- Cleanup: Remove any existing LUI instances before creating new one
+for _, gui in ipairs(CoreGui:GetChildren()) do
+    if gui:IsA("ScreenGui") and gui.Name:sub(1, 4) == "LUI_" then
+        gui:Destroy()
+    end
+end
+
+-- Also cleanup any global connections from previous execution
+if _G.LUI_Connections then
+    for _, connection in pairs(_G.LUI_Connections) do
+        if typeof(connection) == "RBXScriptConnection" then
+            connection:Disconnect()
+        end
+    end
+end
+_G.LUI_Connections = {}
+
 -- Theme Presets
 local ThemePresets = {
     Dark = {
@@ -1072,7 +1089,7 @@ function LUI:CreateWindow(title)
                 Parent = contentFrame,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 24),
+                Size = UDim2.new(1, 0, 0, 28),
                 ClipsDescendants = false,
                 ZIndex = 10
             })
@@ -1100,8 +1117,8 @@ function LUI:CreateWindow(title)
                 Parent = pickerFrame,
                 BackgroundColor3 = currentColor,
                 BorderSizePixel = 0,
-                Position = UDim2.new(1, -80, 0, 4),
-                Size = UDim2.new(0, 72, 0, 20),
+                Position = UDim2.new(1, -76, 0.5, -9),
+                Size = UDim2.new(0, 68, 0, 18),
                 Text = "",
                 AutoButtonColor = false
             })
@@ -1165,7 +1182,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 200, 0, 230),
+                Size = UDim2.new(0, 200, 0, 210),
                 Visible = false,
                 ZIndex = 10000
             })
