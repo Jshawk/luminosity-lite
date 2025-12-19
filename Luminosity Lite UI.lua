@@ -1165,7 +1165,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 220, 0, 228),
+                Size = UDim2.new(0, 220, 0, 250),
                 Visible = false,
                 ZIndex = 10000
             })
@@ -1404,12 +1404,12 @@ function LUI:CreateWindow(title)
             local rgbLabel = create("TextLabel", {
                 Parent = pickerPanel,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 8, 0, 166),
-                Size = UDim2.new(0, 30, 0, 16),
+                Position = UDim2.new(0, 8, 0, 170),
+                Size = UDim2.new(0, 30, 0, 20),
                 Font = Enum.Font.SourceSans,
                 Text = "RGB",
                 TextColor3 = Theme.Text,
-                TextSize = 11,
+                TextSize = 12,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 ZIndex = 10005
             })
@@ -1418,14 +1418,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 35, 0, 166),
-                Size = UDim2.new(0, 38, 0, 18),
+                Position = UDim2.new(0, 38, 0, 170),
+                Size = UDim2.new(0, 40, 0, 20),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.R * 255)),
                 TextColor3 = Color3.fromRGB(255, 100, 100),
                 PlaceholderText = "R",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 12,
                 ClearTextOnFocus = true,
                 ZIndex = 10005
             })
@@ -1439,14 +1439,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 77, 0, 166),
-                Size = UDim2.new(0, 38, 0, 18),
+                Position = UDim2.new(0, 82, 0, 170),
+                Size = UDim2.new(0, 40, 0, 20),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.G * 255)),
                 TextColor3 = Color3.fromRGB(100, 255, 100),
                 PlaceholderText = "G",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 12,
                 ClearTextOnFocus = true,
                 ZIndex = 10005
             })
@@ -1460,14 +1460,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 119, 0, 166),
-                Size = UDim2.new(0, 38, 0, 18),
+                Position = UDim2.new(0, 126, 0, 170),
+                Size = UDim2.new(0, 40, 0, 20),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.B * 255)),
                 TextColor3 = Color3.fromRGB(100, 100, 255),
                 PlaceholderText = "B",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 12,
                 ClearTextOnFocus = true,
                 ZIndex = 10005
             })
@@ -1481,12 +1481,12 @@ function LUI:CreateWindow(title)
             local alphaLabel = create("TextLabel", {
                 Parent = pickerPanel,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 161, 0, 166),
-                Size = UDim2.new(0, 16, 0, 18),
+                Position = UDim2.new(0, 170, 0, 170),
+                Size = UDim2.new(0, 14, 0, 20),
                 Font = Enum.Font.SourceSans,
                 Text = "A",
                 TextColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 12,
                 ZIndex = 10005
             })
             
@@ -1494,14 +1494,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 176, 0, 166),
-                Size = UDim2.new(0, 36, 0, 18),
+                Position = UDim2.new(0, 182, 0, 170),
+                Size = UDim2.new(0, 30, 0, 20),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor((1 - currentTransparency) * 100)) .. "%",
                 TextColor3 = Theme.Text,
                 PlaceholderText = "100%",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 10,
                 ClearTextOnFocus = true,
                 ZIndex = 10005
             })
@@ -1516,7 +1516,7 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 8, 0, 196),
+                Position = UDim2.new(0, 8, 0, 200),
                 Size = UDim2.new(0, 80, 0, 22),
                 Font = Enum.Font.Code,
                 Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
@@ -1525,7 +1525,7 @@ function LUI:CreateWindow(title)
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 11,
                 ClearTextOnFocus = false,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
@@ -1538,14 +1538,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 92, 0, 196),
+                Position = UDim2.new(0, 92, 0, 200),
                 Size = UDim2.new(0, 48, 0, 22),
                 Font = Enum.Font.SourceSans,
                 Text = "Copy",
                 TextColor3 = Theme.Text,
                 TextSize = 11,
                 AutoButtonColor = false,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
@@ -1558,14 +1558,14 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 144, 0, 196),
+                Position = UDim2.new(0, 144, 0, 200),
                 Size = UDim2.new(0, 48, 0, 22),
                 Font = Enum.Font.SourceSans,
                 Text = "Paste",
                 TextColor3 = Theme.Text,
                 TextSize = 11,
                 AutoButtonColor = false,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
