@@ -1190,9 +1190,10 @@ function LUI:CreateWindow(title)
             }
         end
         
-        function tab:AddColorPicker(text, default, callback)
+        function tab:AddColorPicker(text, default, callback, defaultAlpha)
             local currentColor = default or Color3.fromRGB(255, 255, 255)
             local currentHue, currentSat, currentVal = currentColor:ToHSV()
+            local currentAlpha = defaultAlpha or 0 -- 0 = fully opaque, 1 = fully transparent
             local pickerOpen = false
             local copiedColor = nil -- Static variable for copied color
             
@@ -1263,7 +1264,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 200, 0, 170),
+                Size = UDim2.new(0, 200, 0, 200),
                 Visible = false,
                 ZIndex = 10000
             })
@@ -1348,9 +1349,25 @@ function LUI:CreateWindow(title)
                 BackgroundColor3 = Color3.new(1, 1, 1),
                 BorderSizePixel = 0,
                 AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(currentSat, 0, 1 - currentVal, 0),
-                Size = UDim2.new(0, 10, 0, 10),
+                Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0),
+                Size = UDim2.new(0, 12, 0, 12),
                 ZIndex = 10003
+            })
+            
+            -- Inner dot for better visibility
+            local cursorInner = create("Frame", {
+                Parent = satValCursor,
+                BackgroundColor3 = currentColor,
+                BorderSizePixel = 0,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(0.5, 0, 0.5, 0),
+                Size = UDim2.new(0, 6, 0, 6),
+                ZIndex = 10004
+            })
+            
+            create("UICorner", {
+                Parent = cursorInner,
+                CornerRadius = UDim.new(1, 0)
             })
             
             create("UICorner", {
@@ -1489,12 +1506,14 @@ function LUI:CreateWindow(title)
                 currentHue, currentSat, currentVal = currentColor:ToHSV()
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                 hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                 colorPreview.BackgroundColor3 = currentColor
+                cursorInner.BackgroundColor3 = currentColor
+                alphaSliderFill.BackgroundColor3 = currentColor
                 hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
                 
-                if callback then callback(currentColor) end
+                if callback then callback(currentColor, currentAlpha) end
             end
             
             rInput = createRGBInput("R", 0, function() return math.floor(currentColor.R * 255) end, function(v)
@@ -1562,15 +1581,17 @@ function LUI:CreateWindow(title)
                         currentHue, currentSat, currentVal = currentColor:ToHSV()
                         
                         satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                        satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                        satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                         hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                         colorPreview.BackgroundColor3 = currentColor
+                        cursorInner.BackgroundColor3 = currentColor
+                        alphaSliderFill.BackgroundColor3 = currentColor
                         hexLabel.Text = "#" .. hex:upper()
                         rInput.Text = tostring(math.floor(currentColor.R * 255))
                         gInput.Text = tostring(math.floor(currentColor.G * 255))
                         bInput.Text = tostring(math.floor(currentColor.B * 255))
                         
-                        if callback then callback(currentColor) end
+                        if callback then callback(currentColor, currentAlpha) end
                         return
                     end
                 end
@@ -1616,9 +1637,154 @@ function LUI:CreateWindow(title)
                 CornerRadius = UDim.new(0, 3)
             })
             
+            -- Transparency slider
+            local alphaContainer = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 10, 0, 165),
+                Size = UDim2.new(1, -20, 0, 25),
+                ZIndex = 10001
+            })
+            
+            create("TextLabel", {
+                Parent = alphaContainer,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.new(0, 55, 0, 12),
+                Font = Enum.Font.Code,
+                Text = "Opacity",
+                TextColor3 = Theme.Text,
+                TextSize = 10,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 10001
+            })
+            
+            local alphaValueLabel = create("TextLabel", {
+                Parent = alphaContainer,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -30, 0, 0),
+                Size = UDim2.new(0, 30, 0, 12),
+                Font = Enum.Font.Code,
+                Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%",
+                TextColor3 = Theme.Accent,
+                TextSize = 10,
+                TextXAlignment = Enum.TextXAlignment.Right,
+                ZIndex = 10001
+            })
+            
+            -- Alpha slider background (checkerboard pattern simulated)
+            local alphaSliderBg = create("Frame", {
+                Parent = alphaContainer,
+                BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 0, 0, 14),
+                Size = UDim2.new(1, 0, 0, 10),
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = alphaSliderBg,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            -- Checkerboard pattern for transparency visualization
+            local checkerPattern = create("Frame", {
+                Parent = alphaSliderBg,
+                BackgroundColor3 = Color3.fromRGB(120, 120, 120),
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10002,
+                ClipsDescendants = true
+            })
+            
+            create("UICorner", {
+                Parent = checkerPattern,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            -- Create checkerboard effect
+            for i = 0, 18 do
+                local checker = create("Frame", {
+                    Parent = checkerPattern,
+                    BackgroundColor3 = Color3.fromRGB(180, 180, 180),
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, i * 10 + (i % 2 == 0 and 0 or 5), 0, i % 2 == 0 and 0 or 5),
+                    Size = UDim2.new(0, 5, 0, 5),
+                    ZIndex = 10003
+                })
+            end
+            
+            -- Alpha slider fill (shows color fading to transparent)
+            local alphaSliderFill = create("Frame", {
+                Parent = alphaSliderBg,
+                BackgroundColor3 = currentColor,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10004
+            })
+            
+            create("UICorner", {
+                Parent = alphaSliderFill,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            create("UIGradient", {
+                Parent = alphaSliderFill,
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                })
+            })
+            
+            -- Alpha slider cursor
+            local alphaCursor = create("Frame", {
+                Parent = alphaSliderBg,
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0),
+                Size = UDim2.new(0, 6, 0, 14),
+                ZIndex = 10005
+            })
+            
+            create("UICorner", {
+                Parent = alphaCursor,
+                CornerRadius = UDim.new(0, 2)
+            })
+            
+            create("UIStroke", {
+                Parent = alphaCursor,
+                Color = Color3.new(0, 0, 0),
+                Thickness = 1
+            })
+            
+            -- Alpha slider interaction
+            local draggingAlpha = false
+            
+            alphaSliderBg.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingAlpha = true
+                    local relX = math.clamp((input.Position.X - alphaSliderBg.AbsolutePosition.X) / alphaSliderBg.AbsoluteSize.X, 0, 1)
+                    currentAlpha = 1 - relX
+                    alphaCursor.Position = UDim2.new(relX, 0, 0.5, 0)
+                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
+                    if callback then callback(currentColor, currentAlpha) end
+                end
+            end)
+            
+            alphaSliderBg.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingAlpha = false
+                end
+            end)
+            
             -- Shared clipboard for colors (stored in window scope)
             if not window._colorClipboard then
                 window._colorClipboard = nil
+            end
+            
+            if not window._alphaClipboard then
+                window._alphaClipboard = 0
             end
             
             copyBtn.MouseEnter:Connect(function()
@@ -1637,6 +1803,7 @@ function LUI:CreateWindow(title)
             
             local function copyColor()
                 window._colorClipboard = currentColor
+                window._alphaClipboard = currentAlpha
                 copyBtn.Text = "✓"
                 tween(copyBtn, {BackgroundColor3 = Theme.Accent})
                 task.delay(0.5, function()
@@ -1648,12 +1815,17 @@ function LUI:CreateWindow(title)
             local function pasteColor()
                 if window._colorClipboard then
                     currentColor = window._colorClipboard
+                    currentAlpha = window._alphaClipboard or 0
                     currentHue, currentSat, currentVal = currentColor:ToHSV()
                     
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                     hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                     colorPreview.BackgroundColor3 = currentColor
+                    cursorInner.BackgroundColor3 = currentColor
+                    alphaSliderFill.BackgroundColor3 = currentColor
+                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
+                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
                     
                     local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
                     hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
@@ -1669,7 +1841,7 @@ function LUI:CreateWindow(title)
                         tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
                     end)
                     
-                    if callback then callback(currentColor) end
+                    if callback then callback(currentColor, currentAlpha) end
                 end
             end
             
@@ -1681,6 +1853,10 @@ function LUI:CreateWindow(title)
                 currentColor = Color3.fromHSV(currentHue, currentSat, currentVal)
                 colorPreview.BackgroundColor3 = currentColor
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                alphaSliderFill.BackgroundColor3 = currentColor
+                
+                -- Update cursor inner color to show selected color
+                cursorInner.BackgroundColor3 = currentColor
                 
                 local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
                 hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
@@ -1689,7 +1865,7 @@ function LUI:CreateWindow(title)
                 gInput.Text = tostring(g)
                 bInput.Text = tostring(b)
                 
-                if callback then callback(currentColor) end
+                if callback then callback(currentColor, currentAlpha) end
             end
             
             -- Sat/Val picker interaction
@@ -1755,6 +1931,16 @@ function LUI:CreateWindow(title)
                         hueCursor.Position = UDim2.new(0.5, 0, relY, 0)
                         updateColor()
                     end
+                    
+                    if draggingAlpha then
+                        local pos = input.Position
+                        local relX = math.clamp((pos.X - alphaSliderBg.AbsolutePosition.X) / alphaSliderBg.AbsoluteSize.X, 0, 1)
+                        
+                        currentAlpha = 1 - relX
+                        alphaCursor.Position = UDim2.new(relX, 0, 0.5, 0)
+                        alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
+                        if callback then callback(currentColor, currentAlpha) end
+                    end
                 end
             end)
             
@@ -1814,13 +2000,18 @@ function LUI:CreateWindow(title)
             end)
             
             return {
-                Set = function(color)
+                Set = function(color, alpha)
                     currentColor = color
+                    if alpha then currentAlpha = alpha end
                     currentHue, currentSat, currentVal = currentColor:ToHSV()
                     colorPreview.BackgroundColor3 = currentColor
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                     hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                    cursorInner.BackgroundColor3 = currentColor
+                    alphaSliderFill.BackgroundColor3 = currentColor
+                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
+                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
                     
                     local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
                     hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
@@ -1830,7 +2021,15 @@ function LUI:CreateWindow(title)
                     bInput.Text = tostring(b)
                 end,
                 Get = function()
-                    return currentColor
+                    return currentColor, currentAlpha
+                end,
+                GetAlpha = function()
+                    return currentAlpha
+                end,
+                SetAlpha = function(alpha)
+                    currentAlpha = alpha
+                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
+                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
                 end
             }
         end
