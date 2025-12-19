@@ -1354,7 +1354,7 @@ function LUI:CreateWindow(title)
                 BackgroundColor3 = Color3.new(1, 1, 1),
                 BorderSizePixel = 0,
                 AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0),
+                Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0),
                 Size = UDim2.new(0, 12, 0, 12),
                 ZIndex = 10003
             })
@@ -1515,7 +1515,7 @@ function LUI:CreateWindow(title)
                 currentVal = newVal
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                 hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                 colorPreview.BackgroundColor3 = currentColor
                 cursorInner.BackgroundColor3 = currentColor
@@ -1594,7 +1594,7 @@ function LUI:CreateWindow(title)
                         currentVal = newVal
                         
                         satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                        satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                        satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                         hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                         colorPreview.BackgroundColor3 = currentColor
                         cursorInner.BackgroundColor3 = currentColor
@@ -1836,7 +1836,7 @@ function LUI:CreateWindow(title)
                     currentVal = newVal
                     
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                     hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                     colorPreview.BackgroundColor3 = currentColor
                     cursorInner.BackgroundColor3 = currentColor
@@ -1936,7 +1936,7 @@ function LUI:CreateWindow(title)
                         local relX = math.clamp((pos.X - satValPicker.AbsolutePosition.X) / satValPicker.AbsoluteSize.X, 0, 1)
                         local relY = math.clamp((pos.Y - satValPicker.AbsolutePosition.Y) / satValPicker.AbsoluteSize.Y, 0, 1)
                         
-                        currentSat = 1 - relX
+                        currentSat = relX
                         currentVal = 1 - relY
                         satValCursor.Position = UDim2.new(relX, 0, relY, 0)
                         updateColor()
@@ -1989,7 +1989,7 @@ function LUI:CreateWindow(title)
                 currentVal = newVal
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                 hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                 cursorInner.BackgroundColor3 = currentColor
                 alphaSliderFill.BackgroundColor3 = currentColor
@@ -2064,7 +2064,7 @@ function LUI:CreateWindow(title)
                     currentVal = newVal
                     colorPreview.BackgroundColor3 = currentColor
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                     hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
                     cursorInner.BackgroundColor3 = currentColor
                     alphaSliderFill.BackgroundColor3 = currentColor
