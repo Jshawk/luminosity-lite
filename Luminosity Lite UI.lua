@@ -1951,11 +1951,32 @@ function LUI:CreateWindow(title)
                 pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 200, 0, previewPos.Y + previewSize.Y + 5)
             end
             
+            -- Refresh all visual elements to match current color
+            local function refreshPickerVisuals()
+                currentHue, currentSat, currentVal = currentColor:ToHSV()
+                
+                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
+                hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                cursorInner.BackgroundColor3 = currentColor
+                alphaSliderFill.BackgroundColor3 = currentColor
+                alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
+                alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
+                
+                local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
+                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
+                hexInput.Text = hexLabel.Text
+                rInput.Text = tostring(r)
+                gInput.Text = tostring(g)
+                bInput.Text = tostring(b)
+            end
+            
             -- Toggle picker on click
             colorPreview.MouseButton1Click:Connect(function()
                 pickerOpen = not pickerOpen
                 if pickerOpen then
                     updatePickerPosition()
+                    refreshPickerVisuals()
                 end
                 pickerPanel.Visible = pickerOpen
             end)
