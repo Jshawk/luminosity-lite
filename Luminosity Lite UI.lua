@@ -1314,13 +1314,14 @@ function LUI:CreateWindow(title)
                 CornerRadius = UDim.new(0, 4)
             })
             
-            -- Saturation gradient (color to white)
+            -- Saturation gradient (color to white, rotated 180 so color is on left)
             local satGradient = create("UIGradient", {
                 Parent = satValPicker,
                 Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 1, 1)),
+                Rotation = 180,
                 Transparency = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 1),
-                    NumberSequenceKeypoint.new(1, 0)
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
                 })
             })
             
@@ -1873,7 +1874,6 @@ function LUI:CreateWindow(title)
                 
                 -- Update cursor inner color to show selected color
                 cursorInner.BackgroundColor3 = currentColor
-                satValCursor.Position = UDim2.new(math.max(0.001, 1 - currentSat), 0, math.max(0.001, 1 - currentVal), 0)
                 
                 local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
                 hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
@@ -1938,6 +1938,7 @@ function LUI:CreateWindow(title)
                         
                         currentSat = 1 - relX
                         currentVal = 1 - relY
+                        satValCursor.Position = UDim2.new(relX, 0, relY, 0)
                         updateColor()
                     end
                     
