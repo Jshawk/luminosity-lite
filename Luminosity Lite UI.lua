@@ -2241,3 +2241,4 @@ function LUI:CreateWindow(title)
     return window
 end
 
+return LUI
