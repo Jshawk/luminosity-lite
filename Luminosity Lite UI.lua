@@ -1469,7 +1469,7 @@ function LUI:CreateWindow(title)
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 11,
                 ClearTextOnFocus = true,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
@@ -1487,7 +1487,7 @@ function LUI:CreateWindow(title)
                 Text = "A",
                 TextColor3 = Theme.TextDark,
                 TextSize = 11,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             local alphaInput = create("TextBox", {
@@ -1503,7 +1503,7 @@ function LUI:CreateWindow(title)
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 11,
                 ClearTextOnFocus = true,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
