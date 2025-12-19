@@ -1190,6 +1190,651 @@ function LUI:CreateWindow(title)
             }
         end
         
+        function tab:AddColorPicker(text, default, callback)
+            local currentColor = default or Color3.fromRGB(255, 255, 255)
+            local currentHue, currentSat, currentVal = currentColor:ToHSV()
+            local pickerOpen = false
+            local copiedColor = nil -- Static variable for copied color
+            
+            local colorFrame = create("Frame", {
+                Name = text,
+                Parent = contentFrame,
+                BackgroundColor3 = Theme.Element,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 0, 28),
+                ZIndex = 5
+            })
+            
+            create("UIStroke", {
+                Parent = colorFrame,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            create("TextLabel", {
+                Parent = colorFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 8, 0, 0),
+                Size = UDim2.new(0.6, 0, 1, 0),
+                Font = Enum.Font.SourceSans,
+                Text = text,
+                TextColor3 = Theme.Text,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            
+            -- Color preview button
+            local colorPreview = create("TextButton", {
+                Parent = colorFrame,
+                BackgroundColor3 = currentColor,
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -68, 0, 4),
+                Size = UDim2.new(0, 60, 0, 20),
+                Text = "",
+                AutoButtonColor = false
+            })
+            
+            create("UICorner", {
+                Parent = colorPreview,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIStroke", {
+                Parent = colorPreview,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            -- Hex display
+            local hexLabel = create("TextLabel", {
+                Parent = colorPreview,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Font = Enum.Font.Code,
+                Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
+                TextColor3 = Color3.new(1, 1, 1),
+                TextStrokeColor3 = Color3.new(0, 0, 0),
+                TextStrokeTransparency = 0.5,
+                TextSize = 10
+            })
+            
+            -- Color picker panel (parented to screenGui for proper layering)
+            local pickerPanel = create("Frame", {
+                Parent = screenGui,
+                BackgroundColor3 = Theme.Element,
+                BorderSizePixel = 0,
+                Size = UDim2.new(0, 200, 0, 170),
+                Visible = false,
+                ZIndex = 10000
+            })
+            
+            create("UICorner", {
+                Parent = pickerPanel,
+                CornerRadius = UDim.new(0, 6)
+            })
+            
+            create("UIStroke", {
+                Parent = pickerPanel,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            -- Shadow for picker
+            local pickerShadow = create("ImageLabel", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, -10, 0, -10),
+                Size = UDim2.new(1, 20, 1, 20),
+                ZIndex = 9999,
+                Image = "rbxassetid://5554236805",
+                ImageColor3 = Color3.fromRGB(0, 0, 0),
+                ImageTransparency = 0.6,
+                ScaleType = Enum.ScaleType.Slice,
+                SliceCenter = Rect.new(23, 23, 277, 277)
+            })
+            
+            -- Saturation/Value picker (main color square)
+            local satValPicker = create("ImageButton", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1),
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 10, 0, 10),
+                Size = UDim2.new(0, 150, 0, 100),
+                AutoButtonColor = false,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = satValPicker,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Saturation gradient (white to color)
+            local satGradient = create("UIGradient", {
+                Parent = satValPicker,
+                Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 1, 1)),
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                })
+            })
+            
+            -- Value overlay (transparent to black)
+            local valOverlay = create("Frame", {
+                Parent = satValPicker,
+                BackgroundColor3 = Color3.new(0, 0, 0),
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = valOverlay,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIGradient", {
+                Parent = valOverlay,
+                Rotation = 90,
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(1, 0)
+                })
+            })
+            
+            -- Sat/Val cursor
+            local satValCursor = create("Frame", {
+                Parent = satValPicker,
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(currentSat, 0, 1 - currentVal, 0),
+                Size = UDim2.new(0, 10, 0, 10),
+                ZIndex = 10003
+            })
+            
+            create("UICorner", {
+                Parent = satValCursor,
+                CornerRadius = UDim.new(1, 0)
+            })
+            
+            create("UIStroke", {
+                Parent = satValCursor,
+                Color = Color3.new(0, 0, 0),
+                Thickness = 2
+            })
+            
+            -- Hue slider
+            local hueSlider = create("ImageButton", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 170, 0, 10),
+                Size = UDim2.new(0, 20, 0, 100),
+                AutoButtonColor = false,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = hueSlider,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Rainbow gradient for hue
+            create("UIGradient", {
+                Parent = hueSlider,
+                Rotation = 90,
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+                    ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+                    ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                })
+            })
+            
+            -- Hue cursor
+            local hueCursor = create("Frame", {
+                Parent = hueSlider,
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(0.5, 0, currentHue, 0),
+                Size = UDim2.new(1, 4, 0, 6),
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = hueCursor,
+                CornerRadius = UDim.new(0, 2)
+            })
+            
+            create("UIStroke", {
+                Parent = hueCursor,
+                Color = Color3.new(0, 0, 0),
+                Thickness = 1
+            })
+            
+            -- RGB input fields
+            local rgbContainer = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 10, 0, 115),
+                Size = UDim2.new(1, -20, 0, 20),
+                ZIndex = 10001
+            })
+            
+            local function createRGBInput(label, offsetX, getValue, setValue)
+                local container = create("Frame", {
+                    Parent = rgbContainer,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, offsetX, 0, 0),
+                    Size = UDim2.new(0, 55, 0, 20),
+                    ZIndex = 10001
+                })
+                
+                create("TextLabel", {
+                    Parent = container,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(0, 15, 1, 0),
+                    Font = Enum.Font.Code,
+                    Text = label,
+                    TextColor3 = Theme.Text,
+                    TextSize = 11,
+                    ZIndex = 10001
+                })
+                
+                local input = create("TextBox", {
+                    Parent = container,
+                    BackgroundColor3 = Theme.Toggle,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, 18, 0, 0),
+                    Size = UDim2.new(0, 35, 1, 0),
+                    Font = Enum.Font.Code,
+                    Text = tostring(getValue()),
+                    TextColor3 = Theme.Text,
+                    TextSize = 11,
+                    ClearTextOnFocus = true,
+                    ZIndex = 10002
+                })
+                
+                create("UICorner", {
+                    Parent = input,
+                    CornerRadius = UDim.new(0, 3)
+                })
+                
+                input.FocusLost:Connect(function()
+                    local num = tonumber(input.Text)
+                    if num then
+                        num = math.clamp(math.floor(num), 0, 255)
+                        input.Text = tostring(num)
+                        setValue(num)
+                    else
+                        input.Text = tostring(getValue())
+                    end
+                end)
+                
+                return input
+            end
+            
+            local rInput, gInput, bInput
+            
+            local function updateColorFromRGB()
+                local r = tonumber(rInput.Text) or 0
+                local g = tonumber(gInput.Text) or 0
+                local b = tonumber(bInput.Text) or 0
+                currentColor = Color3.fromRGB(r, g, b)
+                currentHue, currentSat, currentVal = currentColor:ToHSV()
+                
+                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                colorPreview.BackgroundColor3 = currentColor
+                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
+                
+                if callback then callback(currentColor) end
+            end
+            
+            rInput = createRGBInput("R", 0, function() return math.floor(currentColor.R * 255) end, function(v)
+                currentColor = Color3.fromRGB(v, math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+                updateColorFromRGB()
+            end)
+            
+            gInput = createRGBInput("G", 60, function() return math.floor(currentColor.G * 255) end, function(v)
+                currentColor = Color3.fromRGB(math.floor(currentColor.R * 255), v, math.floor(currentColor.B * 255))
+                updateColorFromRGB()
+            end)
+            
+            bInput = createRGBInput("B", 120, function() return math.floor(currentColor.B * 255) end, function(v)
+                currentColor = Color3.fromRGB(math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), v)
+                updateColorFromRGB()
+            end)
+            
+            -- Hex input
+            local hexContainer = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 10, 0, 140),
+                Size = UDim2.new(1, -20, 0, 20),
+                ZIndex = 10001
+            })
+            
+            create("TextLabel", {
+                Parent = hexContainer,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, 25, 1, 0),
+                Font = Enum.Font.Code,
+                Text = "HEX",
+                TextColor3 = Theme.Text,
+                TextSize = 10,
+                ZIndex = 10001
+            })
+            
+            local hexInput = create("TextBox", {
+                Parent = hexContainer,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 28, 0, 0),
+                Size = UDim2.new(0, 65, 1, 0),
+                Font = Enum.Font.Code,
+                Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
+                TextColor3 = Theme.Text,
+                TextSize = 10,
+                ClearTextOnFocus = false,
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = hexInput,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            hexInput.FocusLost:Connect(function()
+                local hex = hexInput.Text:gsub("#", "")
+                if #hex == 6 then
+                    local r = tonumber(hex:sub(1, 2), 16)
+                    local g = tonumber(hex:sub(3, 4), 16)
+                    local b = tonumber(hex:sub(5, 6), 16)
+                    if r and g and b then
+                        currentColor = Color3.fromRGB(r, g, b)
+                        currentHue, currentSat, currentVal = currentColor:ToHSV()
+                        
+                        satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                        satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                        hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                        colorPreview.BackgroundColor3 = currentColor
+                        hexLabel.Text = "#" .. hex:upper()
+                        rInput.Text = tostring(math.floor(currentColor.R * 255))
+                        gInput.Text = tostring(math.floor(currentColor.G * 255))
+                        bInput.Text = tostring(math.floor(currentColor.B * 255))
+                        
+                        if callback then callback(currentColor) end
+                        return
+                    end
+                end
+                hexInput.Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+            end)
+            
+            -- Copy/Paste buttons
+            local copyBtn = create("TextButton", {
+                Parent = hexContainer,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 98, 0, 0),
+                Size = UDim2.new(0, 40, 1, 0),
+                Font = Enum.Font.Code,
+                Text = "Copy",
+                TextColor3 = Theme.Text,
+                TextSize = 9,
+                AutoButtonColor = false,
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = copyBtn,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            local pasteBtn = create("TextButton", {
+                Parent = hexContainer,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 142, 0, 0),
+                Size = UDim2.new(0, 40, 1, 0),
+                Font = Enum.Font.Code,
+                Text = "Paste",
+                TextColor3 = Theme.Text,
+                TextSize = 9,
+                AutoButtonColor = false,
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = pasteBtn,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            -- Shared clipboard for colors (stored in window scope)
+            if not window._colorClipboard then
+                window._colorClipboard = nil
+            end
+            
+            copyBtn.MouseEnter:Connect(function()
+                tween(copyBtn, {BackgroundColor3 = Theme.ElementHover})
+            end)
+            copyBtn.MouseLeave:Connect(function()
+                tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
+            end)
+            
+            pasteBtn.MouseEnter:Connect(function()
+                tween(pasteBtn, {BackgroundColor3 = Theme.ElementHover})
+            end)
+            pasteBtn.MouseLeave:Connect(function()
+                tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
+            end)
+            
+            local function copyColor()
+                window._colorClipboard = currentColor
+                copyBtn.Text = "✓"
+                tween(copyBtn, {BackgroundColor3 = Theme.Accent})
+                task.delay(0.5, function()
+                    copyBtn.Text = "Copy"
+                    tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
+                end)
+            end
+            
+            local function pasteColor()
+                if window._colorClipboard then
+                    currentColor = window._colorClipboard
+                    currentHue, currentSat, currentVal = currentColor:ToHSV()
+                    
+                    satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                    satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                    hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                    colorPreview.BackgroundColor3 = currentColor
+                    
+                    local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
+                    hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
+                    hexInput.Text = hexLabel.Text
+                    rInput.Text = tostring(r)
+                    gInput.Text = tostring(g)
+                    bInput.Text = tostring(b)
+                    
+                    pasteBtn.Text = "✓"
+                    tween(pasteBtn, {BackgroundColor3 = Theme.Accent})
+                    task.delay(0.5, function()
+                        pasteBtn.Text = "Paste"
+                        tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
+                    end)
+                    
+                    if callback then callback(currentColor) end
+                end
+            end
+            
+            copyBtn.MouseButton1Click:Connect(copyColor)
+            pasteBtn.MouseButton1Click:Connect(pasteColor)
+            
+            -- Update function for color changes
+            local function updateColor()
+                currentColor = Color3.fromHSV(currentHue, currentSat, currentVal)
+                colorPreview.BackgroundColor3 = currentColor
+                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                
+                local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
+                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
+                hexInput.Text = hexLabel.Text
+                rInput.Text = tostring(r)
+                gInput.Text = tostring(g)
+                bInput.Text = tostring(b)
+                
+                if callback then callback(currentColor) end
+            end
+            
+            -- Sat/Val picker interaction
+            local draggingSatVal = false
+            
+            satValPicker.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSatVal = true
+                end
+            end)
+            
+            satValPicker.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSatVal = false
+                end
+            end)
+            
+            valOverlay.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSatVal = true
+                end
+            end)
+            
+            valOverlay.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSatVal = false
+                end
+            end)
+            
+            -- Hue slider interaction
+            local draggingHue = false
+            
+            hueSlider.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingHue = true
+                end
+            end)
+            
+            hueSlider.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingHue = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if draggingSatVal then
+                        local pos = input.Position
+                        local relX = math.clamp((pos.X - satValPicker.AbsolutePosition.X) / satValPicker.AbsoluteSize.X, 0, 1)
+                        local relY = math.clamp((pos.Y - satValPicker.AbsolutePosition.Y) / satValPicker.AbsoluteSize.Y, 0, 1)
+                        
+                        currentSat = relX
+                        currentVal = 1 - relY
+                        satValCursor.Position = UDim2.new(relX, 0, relY, 0)
+                        updateColor()
+                    end
+                    
+                    if draggingHue then
+                        local pos = input.Position
+                        local relY = math.clamp((pos.Y - hueSlider.AbsolutePosition.Y) / hueSlider.AbsoluteSize.Y, 0, 1)
+                        
+                        currentHue = relY
+                        hueCursor.Position = UDim2.new(0.5, 0, relY, 0)
+                        updateColor()
+                    end
+                end
+            end)
+            
+            -- Position picker panel
+            local function updatePickerPosition()
+                local previewPos = colorPreview.AbsolutePosition
+                local previewSize = colorPreview.AbsoluteSize
+                pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 200, 0, previewPos.Y + previewSize.Y + 5)
+            end
+            
+            -- Toggle picker on click
+            colorPreview.MouseButton1Click:Connect(function()
+                pickerOpen = not pickerOpen
+                if pickerOpen then
+                    updatePickerPosition()
+                end
+                pickerPanel.Visible = pickerOpen
+            end)
+            
+            -- Right-click to copy color
+            colorPreview.MouseButton2Click:Connect(function()
+                if pickerOpen then
+                    pasteColor()
+                else
+                    copyColor()
+                end
+            end)
+            
+            -- Close picker when clicking elsewhere
+            UserInputService.InputBegan:Connect(function(input)
+                if pickerOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local mousePos = input.Position
+                    local panelPos = pickerPanel.AbsolutePosition
+                    local panelSize = pickerPanel.AbsoluteSize
+                    local previewPos = colorPreview.AbsolutePosition
+                    local previewSize = colorPreview.AbsoluteSize
+                    
+                    local inPanel = mousePos.X >= panelPos.X and mousePos.X <= panelPos.X + panelSize.X and
+                                    mousePos.Y >= panelPos.Y and mousePos.Y <= panelPos.Y + panelSize.Y
+                    local inPreview = mousePos.X >= previewPos.X and mousePos.X <= previewPos.X + previewSize.X and
+                                      mousePos.Y >= previewPos.Y and mousePos.Y <= previewPos.Y + previewSize.Y
+                    
+                    if not inPanel and not inPreview then
+                        pickerOpen = false
+                        pickerPanel.Visible = false
+                    end
+                end
+            end)
+            
+            -- Hover effects
+            colorPreview.MouseEnter:Connect(function()
+                tween(colorPreview:FindFirstChildOfClass("UIStroke"), {Color = Theme.Accent})
+            end)
+            
+            colorPreview.MouseLeave:Connect(function()
+                tween(colorPreview:FindFirstChildOfClass("UIStroke"), {Color = Theme.Border})
+            end)
+            
+            return {
+                Set = function(color)
+                    currentColor = color
+                    currentHue, currentSat, currentVal = currentColor:ToHSV()
+                    colorPreview.BackgroundColor3 = currentColor
+                    satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                    satValCursor.Position = UDim2.new(currentSat, 0, 1 - currentVal, 0)
+                    hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
+                    
+                    local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
+                    hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
+                    hexInput.Text = hexLabel.Text
+                    rInput.Text = tostring(r)
+                    gInput.Text = tostring(g)
+                    bInput.Text = tostring(b)
+                end,
+                Get = function()
+                    return currentColor
+                end
+            }
+        end
+        
         -- Add to tabs table
         table.insert(tabs, tab)
         
