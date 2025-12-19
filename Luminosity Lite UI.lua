@@ -1182,7 +1182,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 200, 0, 220),
+                Size = UDim2.new(0, 200, 0, 230),
                 Visible = false,
                 ZIndex = 10000
             })
@@ -2241,4 +2241,3 @@ function LUI:CreateWindow(title)
     return window
 end
 
-return LUI
