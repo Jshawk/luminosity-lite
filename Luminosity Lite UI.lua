@@ -1165,7 +1165,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 220, 0, 200),
+                Size = UDim2.new(0, 220, 0, 228),
                 Visible = false,
                 ZIndex = 10000
             })
@@ -1400,12 +1400,123 @@ function LUI:CreateWindow(title)
                 Thickness = 1
             })
             
+            -- RGB input row
+            local rgbLabel = create("TextLabel", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 8, 0, 166),
+                Size = UDim2.new(0, 30, 0, 16),
+                Font = Enum.Font.SourceSans,
+                Text = "RGB",
+                TextColor3 = Theme.Text,
+                TextSize = 11,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 10001
+            })
+            
+            local rInput = create("TextBox", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 35, 0, 166),
+                Size = UDim2.new(0, 38, 0, 18),
+                Font = Enum.Font.Code,
+                Text = tostring(math.floor(currentColor.R * 255)),
+                TextColor3 = Color3.fromRGB(255, 100, 100),
+                PlaceholderText = "R",
+                PlaceholderColor3 = Theme.TextDark,
+                TextSize = 11,
+                ClearTextOnFocus = true,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = rInput,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            local gInput = create("TextBox", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 77, 0, 166),
+                Size = UDim2.new(0, 38, 0, 18),
+                Font = Enum.Font.Code,
+                Text = tostring(math.floor(currentColor.G * 255)),
+                TextColor3 = Color3.fromRGB(100, 255, 100),
+                PlaceholderText = "G",
+                PlaceholderColor3 = Theme.TextDark,
+                TextSize = 11,
+                ClearTextOnFocus = true,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = gInput,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            local bInput = create("TextBox", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 119, 0, 166),
+                Size = UDim2.new(0, 38, 0, 18),
+                Font = Enum.Font.Code,
+                Text = tostring(math.floor(currentColor.B * 255)),
+                TextColor3 = Color3.fromRGB(100, 100, 255),
+                PlaceholderText = "B",
+                PlaceholderColor3 = Theme.TextDark,
+                TextSize = 11,
+                ClearTextOnFocus = true,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = bInput,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Transparency value display
+            local alphaLabel = create("TextLabel", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 161, 0, 166),
+                Size = UDim2.new(0, 16, 0, 18),
+                Font = Enum.Font.SourceSans,
+                Text = "A",
+                TextColor3 = Theme.TextDark,
+                TextSize = 11,
+                ZIndex = 10001
+            })
+            
+            local alphaInput = create("TextBox", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 176, 0, 166),
+                Size = UDim2.new(0, 36, 0, 18),
+                Font = Enum.Font.Code,
+                Text = tostring(math.floor((1 - currentTransparency) * 100)) .. "%",
+                TextColor3 = Theme.Text,
+                PlaceholderText = "100%",
+                PlaceholderColor3 = Theme.TextDark,
+                TextSize = 11,
+                ClearTextOnFocus = true,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = alphaInput,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
             -- Hex/RGB input and buttons row
             local hexInput = create("TextBox", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 8, 0, 168),
+                Position = UDim2.new(0, 8, 0, 196),
                 Size = UDim2.new(0, 80, 0, 22),
                 Font = Enum.Font.Code,
                 Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
@@ -1427,7 +1538,7 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 92, 0, 168),
+                Position = UDim2.new(0, 92, 0, 196),
                 Size = UDim2.new(0, 48, 0, 22),
                 Font = Enum.Font.SourceSans,
                 Text = "Copy",
@@ -1447,7 +1558,7 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 144, 0, 168),
+                Position = UDim2.new(0, 144, 0, 196),
                 Size = UDim2.new(0, 48, 0, 22),
                 Font = Enum.Font.SourceSans,
                 Text = "Paste",
@@ -1463,7 +1574,7 @@ function LUI:CreateWindow(title)
             })
             
             -- Update color function
-            local function updateColor()
+            local function updateColor(skipRgbUpdate)
                 currentColor = Color3.fromHSV(hue, sat, val)
                 colorOverlay.BackgroundColor3 = currentColor
                 colorOverlay.BackgroundTransparency = currentTransparency
@@ -1474,10 +1585,51 @@ function LUI:CreateWindow(title)
                 transparencyCursor.Position = UDim2.new(currentTransparency, 0, 0.5, 0)
                 hexInput.Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
                 
+                -- Update RGB inputs (skip if called from RGB input to avoid loop)
+                if not skipRgbUpdate then
+                    rInput.Text = tostring(math.floor(currentColor.R * 255))
+                    gInput.Text = tostring(math.floor(currentColor.G * 255))
+                    bInput.Text = tostring(math.floor(currentColor.B * 255))
+                end
+                alphaInput.Text = tostring(math.floor((1 - currentTransparency) * 100)) .. "%"
+                
                 if callback then
                     callback(currentColor, currentTransparency)
                 end
             end
+            
+            -- RGB input handlers
+            local function updateFromRgb()
+                local r = tonumber(rInput.Text) or 0
+                local g = tonumber(gInput.Text) or 0
+                local b = tonumber(bInput.Text) or 0
+                r = math.clamp(r, 0, 255)
+                g = math.clamp(g, 0, 255)
+                b = math.clamp(b, 0, 255)
+                currentColor = Color3.fromRGB(r, g, b)
+                hue, sat, val = rgbToHsv(currentColor)
+                updateColor(true)
+            end
+            
+            rInput.FocusLost:Connect(function()
+                updateFromRgb()
+            end)
+            
+            gInput.FocusLost:Connect(function()
+                updateFromRgb()
+            end)
+            
+            bInput.FocusLost:Connect(function()
+                updateFromRgb()
+            end)
+            
+            alphaInput.FocusLost:Connect(function()
+                local alphaText = alphaInput.Text:gsub("%%", "")
+                local alphaVal = tonumber(alphaText) or 100
+                alphaVal = math.clamp(alphaVal, 0, 100)
+                currentTransparency = 1 - (alphaVal / 100)
+                updateColor()
+            end)
             
             -- Set color from hex
             local function setColorFromHex(hex)
