@@ -1411,7 +1411,7 @@ function LUI:CreateWindow(title)
                 TextColor3 = Theme.Text,
                 TextSize = 11,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             local rInput = create("TextBox", {
@@ -1427,7 +1427,7 @@ function LUI:CreateWindow(title)
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 11,
                 ClearTextOnFocus = true,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
@@ -1448,7 +1448,7 @@ function LUI:CreateWindow(title)
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 11,
                 ClearTextOnFocus = true,
-                ZIndex = 10001
+                ZIndex = 10005
             })
             
             create("UICorner", {
