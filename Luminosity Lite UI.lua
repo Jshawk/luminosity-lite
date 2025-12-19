@@ -1953,6 +1953,8 @@ function LUI:CreateWindow(title)
             
             -- Refresh all visual elements to match current color
             local function refreshPickerVisuals()
+                -- Use the preview color as the source of truth
+                currentColor = colorPreview.BackgroundColor3
                 currentHue, currentSat, currentVal = currentColor:ToHSV()
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
