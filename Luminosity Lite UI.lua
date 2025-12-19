@@ -1038,6 +1038,670 @@ function LUI:CreateWindow(title)
             }
         end
         
+        function tab:AddColorPicker(text, default, callback)
+            local currentColor = default or Color3.fromRGB(255, 255, 255)
+            local currentTransparency = 0
+            local expanded = false
+            
+            -- Convert Color3 to HSV
+            local function rgbToHsv(color)
+                local r, g, b = color.R, color.G, color.B
+                local max, min = math.max(r, g, b), math.min(r, g, b)
+                local h, s, v = 0, 0, max
+                local d = max - min
+                s = max == 0 and 0 or d / max
+                if max ~= min then
+                    if max == r then
+                        h = (g - b) / d + (g < b and 6 or 0)
+                    elseif max == g then
+                        h = (b - r) / d + 2
+                    else
+                        h = (r - g) / d + 4
+                    end
+                    h = h / 6
+                end
+                return h, s, v
+            end
+            
+            -- Initial HSV values
+            local hue, sat, val = rgbToHsv(currentColor)
+            
+            -- Main picker frame
+            local pickerFrame = create("Frame", {
+                Name = text,
+                Parent = contentFrame,
+                BackgroundColor3 = Theme.Element,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 0, 28),
+                ClipsDescendants = false,
+                ZIndex = 10
+            })
+            
+            create("UIStroke", {
+                Parent = pickerFrame,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            create("TextLabel", {
+                Parent = pickerFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 8, 0, 0),
+                Size = UDim2.new(0.5, 0, 1, 0),
+                Font = Enum.Font.SourceSans,
+                Text = text,
+                TextColor3 = Theme.Text,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            
+            -- Color preview button
+            local colorPreview = create("TextButton", {
+                Parent = pickerFrame,
+                BackgroundColor3 = currentColor,
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -80, 0, 4),
+                Size = UDim2.new(0, 72, 0, 20),
+                Text = "",
+                AutoButtonColor = false
+            })
+            
+            create("UIStroke", {
+                Parent = colorPreview,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            create("UICorner", {
+                Parent = colorPreview,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Checkerboard pattern for transparency preview
+            local checkerboard = create("Frame", {
+                Parent = colorPreview,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 0
+            })
+            
+            create("UICorner", {
+                Parent = checkerboard,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            local checkerPattern = create("ImageLabel", {
+                Parent = checkerboard,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Image = "rbxassetid://6699767957",
+                ImageColor3 = Color3.fromRGB(200, 200, 200),
+                ScaleType = Enum.ScaleType.Tile,
+                TileSize = UDim2.new(0, 8, 0, 8),
+                ZIndex = 0
+            })
+            
+            create("UICorner", {
+                Parent = checkerPattern,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Color overlay with transparency
+            local colorOverlay = create("Frame", {
+                Parent = colorPreview,
+                BackgroundColor3 = currentColor,
+                BackgroundTransparency = currentTransparency,
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 1
+            })
+            
+            create("UICorner", {
+                Parent = colorOverlay,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Expanded picker panel (parented to screenGui for layering)
+            local pickerPanel = create("Frame", {
+                Parent = screenGui,
+                BackgroundColor3 = Theme.Element,
+                BorderSizePixel = 0,
+                Size = UDim2.new(0, 220, 0, 200),
+                Visible = false,
+                ZIndex = 10000
+            })
+            
+            create("UIStroke", {
+                Parent = pickerPanel,
+                Color = Theme.Border,
+                Thickness = 1
+            })
+            
+            create("UICorner", {
+                Parent = pickerPanel,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Saturation/Brightness gradient selector
+            local gradientFrame = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Color3.fromHSV(hue, 1, 1),
+                Position = UDim2.new(0, 8, 0, 8),
+                Size = UDim2.new(0, 160, 0, 120),
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = gradientFrame,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- White to color gradient (horizontal - saturation)
+            local satGradient = create("Frame", {
+                Parent = gradientFrame,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = satGradient,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIGradient", {
+                Parent = satGradient,
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                }),
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                })
+            })
+            
+            -- Black gradient (vertical - value/brightness)
+            local valGradient = create("Frame", {
+                Parent = gradientFrame,
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10003
+            })
+            
+            create("UICorner", {
+                Parent = valGradient,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIGradient", {
+                Parent = valGradient,
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                }),
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(1, 0)
+                }),
+                Rotation = 90
+            })
+            
+            -- Saturation/Value selector cursor
+            local svCursor = create("Frame", {
+                Parent = gradientFrame,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(sat, 0, 1 - val, 0),
+                Size = UDim2.new(0, 12, 0, 12),
+                ZIndex = 10004
+            })
+            
+            create("UICorner", {
+                Parent = svCursor,
+                CornerRadius = UDim.new(1, 0)
+            })
+            
+            create("UIStroke", {
+                Parent = svCursor,
+                Color = Color3.fromRGB(0, 0, 0),
+                Thickness = 2
+            })
+            
+            -- Hue slider
+            local hueSliderBg = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                Position = UDim2.new(0, 176, 0, 8),
+                Size = UDim2.new(0, 16, 0, 120),
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = hueSliderBg,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIGradient", {
+                Parent = hueSliderBg,
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+                    ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+                    ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+                    ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+                    ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                }),
+                Rotation = 90
+            })
+            
+            -- Hue cursor
+            local hueCursor = create("Frame", {
+                Parent = hueSliderBg,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(0.5, 0, hue, 0),
+                Size = UDim2.new(1, 4, 0, 6),
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = hueCursor,
+                CornerRadius = UDim.new(0, 2)
+            })
+            
+            create("UIStroke", {
+                Parent = hueCursor,
+                Color = Color3.fromRGB(0, 0, 0),
+                Thickness = 1
+            })
+            
+            -- Transparency slider
+            local transparencyLabel = create("TextLabel", {
+                Parent = pickerPanel,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 8, 0, 132),
+                Size = UDim2.new(0, 70, 0, 16),
+                Font = Enum.Font.SourceSans,
+                Text = "Transparency",
+                TextColor3 = Theme.Text,
+                TextSize = 11,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 10001
+            })
+            
+            local transparencySliderBg = create("Frame", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                Position = UDim2.new(0, 8, 0, 148),
+                Size = UDim2.new(0, 184, 0, 12),
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = transparencySliderBg,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Checkerboard for transparency slider
+            local transChecker = create("ImageLabel", {
+                Parent = transparencySliderBg,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Image = "rbxassetid://6699767957",
+                ImageColor3 = Color3.fromRGB(200, 200, 200),
+                ScaleType = Enum.ScaleType.Tile,
+                TileSize = UDim2.new(0, 6, 0, 6),
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = transChecker,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            local transparencyOverlay = create("Frame", {
+                Parent = transparencySliderBg,
+                BackgroundColor3 = currentColor,
+                Size = UDim2.new(1, 0, 1, 0),
+                ZIndex = 10002
+            })
+            
+            create("UICorner", {
+                Parent = transparencyOverlay,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            create("UIGradient", {
+                Parent = transparencyOverlay,
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                })
+            })
+            
+            local transparencyCursor = create("Frame", {
+                Parent = transparencySliderBg,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(currentTransparency, 0, 0.5, 0),
+                Size = UDim2.new(0, 6, 1, 4),
+                ZIndex = 10003
+            })
+            
+            create("UICorner", {
+                Parent = transparencyCursor,
+                CornerRadius = UDim.new(0, 2)
+            })
+            
+            create("UIStroke", {
+                Parent = transparencyCursor,
+                Color = Color3.fromRGB(0, 0, 0),
+                Thickness = 1
+            })
+            
+            -- Hex/RGB input and buttons row
+            local hexInput = create("TextBox", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 8, 0, 168),
+                Size = UDim2.new(0, 80, 0, 22),
+                Font = Enum.Font.Code,
+                Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
+                TextColor3 = Theme.Text,
+                PlaceholderText = "#FFFFFF",
+                PlaceholderColor3 = Theme.TextDark,
+                TextSize = 11,
+                ClearTextOnFocus = false,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = hexInput,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Copy button
+            local copyBtn = create("TextButton", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 92, 0, 168),
+                Size = UDim2.new(0, 48, 0, 22),
+                Font = Enum.Font.SourceSans,
+                Text = "Copy",
+                TextColor3 = Theme.Text,
+                TextSize = 11,
+                AutoButtonColor = false,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = copyBtn,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Paste button
+            local pasteBtn = create("TextButton", {
+                Parent = pickerPanel,
+                BackgroundColor3 = Theme.Toggle,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 144, 0, 168),
+                Size = UDim2.new(0, 48, 0, 22),
+                Font = Enum.Font.SourceSans,
+                Text = "Paste",
+                TextColor3 = Theme.Text,
+                TextSize = 11,
+                AutoButtonColor = false,
+                ZIndex = 10001
+            })
+            
+            create("UICorner", {
+                Parent = pasteBtn,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            -- Update color function
+            local function updateColor()
+                currentColor = Color3.fromHSV(hue, sat, val)
+                colorOverlay.BackgroundColor3 = currentColor
+                colorOverlay.BackgroundTransparency = currentTransparency
+                gradientFrame.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                transparencyOverlay.BackgroundColor3 = currentColor
+                svCursor.Position = UDim2.new(sat, 0, 1 - val, 0)
+                hueCursor.Position = UDim2.new(0.5, 0, hue, 0)
+                transparencyCursor.Position = UDim2.new(currentTransparency, 0, 0.5, 0)
+                hexInput.Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+                
+                if callback then
+                    callback(currentColor, currentTransparency)
+                end
+            end
+            
+            -- Set color from hex
+            local function setColorFromHex(hex)
+                hex = hex:gsub("#", "")
+                if #hex == 6 then
+                    local r = tonumber(hex:sub(1, 2), 16)
+                    local g = tonumber(hex:sub(3, 4), 16)
+                    local b = tonumber(hex:sub(5, 6), 16)
+                    if r and g and b then
+                        currentColor = Color3.fromRGB(r, g, b)
+                        hue, sat, val = rgbToHsv(currentColor)
+                        updateColor()
+                        return true
+                    end
+                end
+                return false
+            end
+            
+            -- Gradient selector input
+            local selectingSV = false
+            
+            gradientFrame.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingSV = true
+                end
+            end)
+            
+            gradientFrame.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingSV = false
+                end
+            end)
+            
+            -- Hue slider input
+            local selectingHue = false
+            
+            hueSliderBg.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingHue = true
+                end
+            end)
+            
+            hueSliderBg.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingHue = false
+                end
+            end)
+            
+            -- Transparency slider input
+            local selectingTransparency = false
+            
+            transparencySliderBg.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingTransparency = true
+                end
+            end)
+            
+            transparencySliderBg.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selectingTransparency = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if selectingSV then
+                        local relX = math.clamp((input.Position.X - gradientFrame.AbsolutePosition.X) / gradientFrame.AbsoluteSize.X, 0, 1)
+                        local relY = math.clamp((input.Position.Y - gradientFrame.AbsolutePosition.Y) / gradientFrame.AbsoluteSize.Y, 0, 1)
+                        sat = relX
+                        val = 1 - relY
+                        updateColor()
+                    elseif selectingHue then
+                        local relY = math.clamp((input.Position.Y - hueSliderBg.AbsolutePosition.Y) / hueSliderBg.AbsoluteSize.Y, 0, 1)
+                        hue = relY
+                        updateColor()
+                    elseif selectingTransparency then
+                        local relX = math.clamp((input.Position.X - transparencySliderBg.AbsolutePosition.X) / transparencySliderBg.AbsoluteSize.X, 0, 1)
+                        currentTransparency = relX
+                        updateColor()
+                    end
+                end
+            end)
+            
+            -- Initial click handling for sliders
+            UserInputService.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    task.wait()
+                    if selectingSV then
+                        local relX = math.clamp((input.Position.X - gradientFrame.AbsolutePosition.X) / gradientFrame.AbsoluteSize.X, 0, 1)
+                        local relY = math.clamp((input.Position.Y - gradientFrame.AbsolutePosition.Y) / gradientFrame.AbsoluteSize.Y, 0, 1)
+                        sat = relX
+                        val = 1 - relY
+                        updateColor()
+                    elseif selectingHue then
+                        local relY = math.clamp((input.Position.Y - hueSliderBg.AbsolutePosition.Y) / hueSliderBg.AbsoluteSize.Y, 0, 1)
+                        hue = relY
+                        updateColor()
+                    elseif selectingTransparency then
+                        local relX = math.clamp((input.Position.X - transparencySliderBg.AbsolutePosition.X) / transparencySliderBg.AbsoluteSize.X, 0, 1)
+                        currentTransparency = relX
+                        updateColor()
+                    end
+                end
+            end)
+            
+            -- Hex input handler
+            hexInput.FocusLost:Connect(function(enterPressed)
+                if not setColorFromHex(hexInput.Text) then
+                    -- Revert to current color if invalid
+                    hexInput.Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+                end
+            end)
+            
+            -- Copy button
+            copyBtn.MouseButton1Click:Connect(function()
+                local hexColor = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+                if setclipboard then
+                    setclipboard(hexColor)
+                elseif syn and syn.write_clipboard then
+                    syn.write_clipboard(hexColor)
+                end
+                copyBtn.Text = "Copied!"
+                task.delay(1, function()
+                    copyBtn.Text = "Copy"
+                end)
+            end)
+            
+            copyBtn.MouseEnter:Connect(function()
+                tween(copyBtn, {BackgroundColor3 = Theme.ElementHover})
+            end)
+            
+            copyBtn.MouseLeave:Connect(function()
+                tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
+            end)
+            
+            -- Paste button
+            pasteBtn.MouseButton1Click:Connect(function()
+                local clipboard = ""
+                if getclipboard then
+                    clipboard = getclipboard()
+                elseif syn and syn.read_clipboard then
+                    clipboard = syn.read_clipboard()
+                end
+                
+                if clipboard and clipboard ~= "" then
+                    if setColorFromHex(clipboard) then
+                        pasteBtn.Text = "Pasted!"
+                    else
+                        pasteBtn.Text = "Invalid"
+                    end
+                    task.delay(1, function()
+                        pasteBtn.Text = "Paste"
+                    end)
+                end
+            end)
+            
+            pasteBtn.MouseEnter:Connect(function()
+                tween(pasteBtn, {BackgroundColor3 = Theme.ElementHover})
+            end)
+            
+            pasteBtn.MouseLeave:Connect(function()
+                tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
+            end)
+            
+            -- Update panel position
+            local function updatePanelPosition()
+                local previewPos = colorPreview.AbsolutePosition
+                local previewSize = colorPreview.AbsoluteSize
+                pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 220, 0, previewPos.Y + previewSize.Y + 4)
+            end
+            
+            -- Toggle picker panel
+            colorPreview.MouseButton1Click:Connect(function()
+                expanded = not expanded
+                if expanded then
+                    updatePanelPosition()
+                end
+                pickerPanel.Visible = expanded
+            end)
+            
+            -- Close picker when clicking outside
+            UserInputService.InputBegan:Connect(function(input)
+                if expanded and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local mousePos = input.Position
+                    local panelPos = pickerPanel.AbsolutePosition
+                    local panelSize = pickerPanel.AbsoluteSize
+                    local previewPos = colorPreview.AbsolutePosition
+                    local previewSize = colorPreview.AbsoluteSize
+                    
+                    local inPanel = mousePos.X >= panelPos.X and mousePos.X <= panelPos.X + panelSize.X and
+                                    mousePos.Y >= panelPos.Y and mousePos.Y <= panelPos.Y + panelSize.Y
+                    local inPreview = mousePos.X >= previewPos.X and mousePos.X <= previewPos.X + previewSize.X and
+                                      mousePos.Y >= previewPos.Y and mousePos.Y <= previewPos.Y + previewSize.Y
+                    
+                    if not inPanel and not inPreview then
+                        expanded = false
+                        pickerPanel.Visible = false
+                    end
+                end
+            end)
+            
+            -- Track for theme updates
+            table.insert(dropdownLists, pickerPanel)
+            
+            return {
+                Set = function(color, transparency)
+                    if color then
+                        currentColor = color
+                        hue, sat, val = rgbToHsv(currentColor)
+                    end
+                    if transparency then
+                        currentTransparency = transparency
+                    end
+                    updateColor()
+                end,
+                Get = function()
+                    return currentColor, currentTransparency
+                end,
+                GetHex = function()
+                    return "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
+                end
+            }
+        end
+        
         function tab:AddList(text, options, callback)
             local selected = options[1] or ""
             local expanded = false
@@ -1186,908 +1850,6 @@ function LUI:CreateWindow(title)
                 end,
                 Get = function()
                     return selected
-                end
-            }
-        end
-        
-        function tab:AddColorPicker(text, default, callback, defaultAlpha)
-            local currentColor = default or Color3.fromRGB(255, 255, 255)
-            local initHue, initSat, initVal = currentColor:ToHSV()
-            -- For achromatic colors (white/gray/black), hue is undefined - default to 0 (red)
-            local currentHue = (initSat > 0.01) and initHue or 0
-            local currentSat = initSat
-            local currentVal = initVal
-            local currentAlpha = defaultAlpha or 0 -- 0 = fully opaque, 1 = fully transparent
-            local pickerOpen = false
-            local copiedColor = nil -- Static variable for copied color
-            
-            local colorFrame = create("Frame", {
-                Name = text,
-                Parent = contentFrame,
-                BackgroundColor3 = Theme.Element,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 28),
-                ZIndex = 5
-            })
-            
-            create("UIStroke", {
-                Parent = colorFrame,
-                Color = Theme.Border,
-                Thickness = 1
-            })
-            
-            create("TextLabel", {
-                Parent = colorFrame,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 8, 0, 0),
-                Size = UDim2.new(0.6, 0, 1, 0),
-                Font = Enum.Font.SourceSans,
-                Text = text,
-                TextColor3 = Theme.Text,
-                TextSize = 13,
-                TextXAlignment = Enum.TextXAlignment.Left
-            })
-            
-            -- Color preview button
-            local colorPreview = create("TextButton", {
-                Parent = colorFrame,
-                BackgroundColor3 = currentColor,
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -68, 0, 4),
-                Size = UDim2.new(0, 60, 0, 20),
-                Text = "",
-                AutoButtonColor = false
-            })
-            
-            create("UICorner", {
-                Parent = colorPreview,
-                CornerRadius = UDim.new(0, 4)
-            })
-            
-            create("UIStroke", {
-                Parent = colorPreview,
-                Color = Theme.Border,
-                Thickness = 1
-            })
-            
-            -- Hex display
-            local hexLabel = create("TextLabel", {
-                Parent = colorPreview,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                Font = Enum.Font.Code,
-                Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
-                TextColor3 = Color3.new(1, 1, 1),
-                TextStrokeColor3 = Color3.new(0, 0, 0),
-                TextStrokeTransparency = 0.5,
-                TextSize = 10
-            })
-            
-            -- Color picker panel (parented to screenGui for proper layering)
-            local pickerPanel = create("Frame", {
-                Parent = screenGui,
-                BackgroundColor3 = Theme.Element,
-                BorderSizePixel = 0,
-                Size = UDim2.new(0, 200, 0, 200),
-                Visible = false,
-                ZIndex = 10000
-            })
-            
-            create("UICorner", {
-                Parent = pickerPanel,
-                CornerRadius = UDim.new(0, 6)
-            })
-            
-            create("UIStroke", {
-                Parent = pickerPanel,
-                Color = Theme.Border,
-                Thickness = 1
-            })
-            
-            -- Shadow for picker
-            local pickerShadow = create("ImageLabel", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, -10, 0, -10),
-                Size = UDim2.new(1, 20, 1, 20),
-                ZIndex = 9999,
-                Image = "rbxassetid://5554236805",
-                ImageColor3 = Color3.fromRGB(0, 0, 0),
-                ImageTransparency = 0.6,
-                ScaleType = Enum.ScaleType.Slice,
-                SliceCenter = Rect.new(23, 23, 277, 277)
-            })
-            
-            -- Saturation/Value picker (main color square)
-            local satValPicker = create("ImageButton", {
-                Parent = pickerPanel,
-                BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1),
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 10, 0, 10),
-                Size = UDim2.new(0, 150, 0, 100),
-                AutoButtonColor = false,
-                ZIndex = 10001
-            })
-            
-            create("UICorner", {
-                Parent = satValPicker,
-                CornerRadius = UDim.new(0, 4)
-            })
-            
-            -- Saturation gradient (color to white, rotated 180 so color is on left)
-            local satGradient = create("UIGradient", {
-                Parent = satValPicker,
-                Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 1, 1)),
-                Rotation = 180,
-                Transparency = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0),
-                    NumberSequenceKeypoint.new(1, 1)
-                })
-            })
-            
-            -- Value overlay (transparent to black)
-            local valOverlay = create("Frame", {
-                Parent = satValPicker,
-                BackgroundColor3 = Color3.new(0, 0, 0),
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0),
-                ZIndex = 10002
-            })
-            
-            create("UICorner", {
-                Parent = valOverlay,
-                CornerRadius = UDim.new(0, 4)
-            })
-            
-            create("UIGradient", {
-                Parent = valOverlay,
-                Rotation = 90,
-                Transparency = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 1),
-                    NumberSequenceKeypoint.new(1, 0)
-                })
-            })
-            
-            -- Sat/Val cursor
-            local satValCursor = create("Frame", {
-                Parent = satValPicker,
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BorderSizePixel = 0,
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0),
-                Size = UDim2.new(0, 12, 0, 12),
-                ZIndex = 10003
-            })
-            
-            -- Inner dot for better visibility
-            local cursorInner = create("Frame", {
-                Parent = satValCursor,
-                BackgroundColor3 = currentColor,
-                BorderSizePixel = 0,
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(0.5, 0, 0.5, 0),
-                Size = UDim2.new(0, 6, 0, 6),
-                ZIndex = 10004
-            })
-            
-            create("UICorner", {
-                Parent = cursorInner,
-                CornerRadius = UDim.new(1, 0)
-            })
-            
-            create("UICorner", {
-                Parent = satValCursor,
-                CornerRadius = UDim.new(1, 0)
-            })
-            
-            create("UIStroke", {
-                Parent = satValCursor,
-                Color = Color3.new(0, 0, 0),
-                Thickness = 2
-            })
-            
-            -- Hue slider
-            local hueSlider = create("ImageButton", {
-                Parent = pickerPanel,
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 170, 0, 10),
-                Size = UDim2.new(0, 20, 0, 100),
-                AutoButtonColor = false,
-                ZIndex = 10001
-            })
-            
-            create("UICorner", {
-                Parent = hueSlider,
-                CornerRadius = UDim.new(0, 4)
-            })
-            
-            -- Rainbow gradient for hue
-            create("UIGradient", {
-                Parent = hueSlider,
-                Rotation = 90,
-                Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-                    ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
-                    ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
-                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-                    ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
-                    ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-                })
-            })
-            
-            -- Hue cursor
-            local hueCursor = create("Frame", {
-                Parent = hueSlider,
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BorderSizePixel = 0,
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(0.5, 0, currentHue, 0),
-                Size = UDim2.new(1, 4, 0, 6),
-                ZIndex = 10002
-            })
-            
-            create("UICorner", {
-                Parent = hueCursor,
-                CornerRadius = UDim.new(0, 2)
-            })
-            
-            create("UIStroke", {
-                Parent = hueCursor,
-                Color = Color3.new(0, 0, 0),
-                Thickness = 1
-            })
-            
-            -- RGB input fields
-            local rgbContainer = create("Frame", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 115),
-                Size = UDim2.new(1, -20, 0, 20),
-                ZIndex = 10001
-            })
-            
-            local function createRGBInput(label, offsetX, getValue, setValue)
-                local container = create("Frame", {
-                    Parent = rgbContainer,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0, offsetX, 0, 0),
-                    Size = UDim2.new(0, 55, 0, 20),
-                    ZIndex = 10001
-                })
-                
-                create("TextLabel", {
-                    Parent = container,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(0, 15, 1, 0),
-                    Font = Enum.Font.Code,
-                    Text = label,
-                    TextColor3 = Theme.Text,
-                    TextSize = 11,
-                    ZIndex = 10001
-                })
-                
-                local input = create("TextBox", {
-                    Parent = container,
-                    BackgroundColor3 = Theme.Toggle,
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, 18, 0, 0),
-                    Size = UDim2.new(0, 35, 1, 0),
-                    Font = Enum.Font.Code,
-                    Text = tostring(getValue()),
-                    TextColor3 = Theme.Text,
-                    TextSize = 11,
-                    ClearTextOnFocus = true,
-                    ZIndex = 10002
-                })
-                
-                create("UICorner", {
-                    Parent = input,
-                    CornerRadius = UDim.new(0, 3)
-                })
-                
-                input.FocusLost:Connect(function()
-                    local num = tonumber(input.Text)
-                    if num then
-                        num = math.clamp(math.floor(num), 0, 255)
-                        input.Text = tostring(num)
-                        setValue(num)
-                    else
-                        input.Text = tostring(getValue())
-                    end
-                end)
-                
-                return input
-            end
-            
-            local rInput, gInput, bInput
-            
-            local function updateColorFromRGB()
-                local r = tonumber(rInput.Text) or 0
-                local g = tonumber(gInput.Text) or 0
-                local b = tonumber(bInput.Text) or 0
-                currentColor = Color3.fromRGB(r, g, b)
-                local newHue, newSat, newVal = currentColor:ToHSV()
-                -- Preserve hue for achromatic colors
-                if newSat > 0.01 then currentHue = newHue end
-                currentSat = newSat
-                currentVal = newVal
-                
-                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
-                hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
-                colorPreview.BackgroundColor3 = currentColor
-                cursorInner.BackgroundColor3 = currentColor
-                alphaSliderFill.BackgroundColor3 = currentColor
-                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
-                
-                if callback then callback(currentColor, currentAlpha) end
-            end
-            
-            rInput = createRGBInput("R", 0, function() return math.floor(currentColor.R * 255) end, function(v)
-                currentColor = Color3.fromRGB(v, math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
-                updateColorFromRGB()
-            end)
-            
-            gInput = createRGBInput("G", 60, function() return math.floor(currentColor.G * 255) end, function(v)
-                currentColor = Color3.fromRGB(math.floor(currentColor.R * 255), v, math.floor(currentColor.B * 255))
-                updateColorFromRGB()
-            end)
-            
-            bInput = createRGBInput("B", 120, function() return math.floor(currentColor.B * 255) end, function(v)
-                currentColor = Color3.fromRGB(math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), v)
-                updateColorFromRGB()
-            end)
-            
-            -- Hex input
-            local hexContainer = create("Frame", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 140),
-                Size = UDim2.new(1, -20, 0, 20),
-                ZIndex = 10001
-            })
-            
-            create("TextLabel", {
-                Parent = hexContainer,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 25, 1, 0),
-                Font = Enum.Font.Code,
-                Text = "HEX",
-                TextColor3 = Theme.Text,
-                TextSize = 10,
-                ZIndex = 10001
-            })
-            
-            local hexInput = create("TextBox", {
-                Parent = hexContainer,
-                BackgroundColor3 = Theme.Toggle,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 28, 0, 0),
-                Size = UDim2.new(0, 65, 1, 0),
-                Font = Enum.Font.Code,
-                Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
-                TextColor3 = Theme.Text,
-                TextSize = 10,
-                ClearTextOnFocus = false,
-                ZIndex = 10002
-            })
-            
-            create("UICorner", {
-                Parent = hexInput,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            hexInput.FocusLost:Connect(function()
-                local hex = hexInput.Text:gsub("#", "")
-                if #hex == 6 then
-                    local r = tonumber(hex:sub(1, 2), 16)
-                    local g = tonumber(hex:sub(3, 4), 16)
-                    local b = tonumber(hex:sub(5, 6), 16)
-                    if r and g and b then
-                        currentColor = Color3.fromRGB(r, g, b)
-                        local newHue, newSat, newVal = currentColor:ToHSV()
-                        -- Preserve hue for achromatic colors
-                        if newSat > 0.01 then currentHue = newHue end
-                        currentSat = newSat
-                        currentVal = newVal
-                        
-                        satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                        satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
-                        hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
-                        colorPreview.BackgroundColor3 = currentColor
-                        cursorInner.BackgroundColor3 = currentColor
-                        alphaSliderFill.BackgroundColor3 = currentColor
-                        hexLabel.Text = "#" .. hex:upper()
-                        rInput.Text = tostring(math.floor(currentColor.R * 255))
-                        gInput.Text = tostring(math.floor(currentColor.G * 255))
-                        bInput.Text = tostring(math.floor(currentColor.B * 255))
-                        
-                        if callback then callback(currentColor, currentAlpha) end
-                        return
-                    end
-                end
-                hexInput.Text = string.format("#%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255))
-            end)
-            
-            -- Copy/Paste buttons
-            local copyBtn = create("TextButton", {
-                Parent = hexContainer,
-                BackgroundColor3 = Theme.Toggle,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 98, 0, 0),
-                Size = UDim2.new(0, 40, 1, 0),
-                Font = Enum.Font.Code,
-                Text = "Copy",
-                TextColor3 = Theme.Text,
-                TextSize = 9,
-                AutoButtonColor = false,
-                ZIndex = 10002
-            })
-            
-            create("UICorner", {
-                Parent = copyBtn,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            local pasteBtn = create("TextButton", {
-                Parent = hexContainer,
-                BackgroundColor3 = Theme.Toggle,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 142, 0, 0),
-                Size = UDim2.new(0, 40, 1, 0),
-                Font = Enum.Font.Code,
-                Text = "Paste",
-                TextColor3 = Theme.Text,
-                TextSize = 9,
-                AutoButtonColor = false,
-                ZIndex = 10002
-            })
-            
-            create("UICorner", {
-                Parent = pasteBtn,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            -- Transparency slider
-            local alphaContainer = create("Frame", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 165),
-                Size = UDim2.new(1, -20, 0, 25),
-                ZIndex = 10001
-            })
-            
-            create("TextLabel", {
-                Parent = alphaContainer,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 0, 0, 0),
-                Size = UDim2.new(0, 55, 0, 12),
-                Font = Enum.Font.Code,
-                Text = "Opacity",
-                TextColor3 = Theme.Text,
-                TextSize = 10,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = 10001
-            })
-            
-            local alphaValueLabel = create("TextLabel", {
-                Parent = alphaContainer,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -30, 0, 0),
-                Size = UDim2.new(0, 30, 0, 12),
-                Font = Enum.Font.Code,
-                Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%",
-                TextColor3 = Theme.Accent,
-                TextSize = 10,
-                TextXAlignment = Enum.TextXAlignment.Right,
-                ZIndex = 10001
-            })
-            
-            -- Alpha slider background (checkerboard pattern simulated)
-            local alphaSliderBg = create("Frame", {
-                Parent = alphaContainer,
-                BackgroundColor3 = Color3.fromRGB(60, 60, 60),
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 0, 0, 14),
-                Size = UDim2.new(1, 0, 0, 10),
-                ZIndex = 10001
-            })
-            
-            create("UICorner", {
-                Parent = alphaSliderBg,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            -- Checkerboard pattern for transparency visualization
-            local checkerPattern = create("Frame", {
-                Parent = alphaSliderBg,
-                BackgroundColor3 = Color3.fromRGB(120, 120, 120),
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0),
-                ZIndex = 10002,
-                ClipsDescendants = true
-            })
-            
-            create("UICorner", {
-                Parent = checkerPattern,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            -- Create checkerboard effect
-            for i = 0, 18 do
-                local checker = create("Frame", {
-                    Parent = checkerPattern,
-                    BackgroundColor3 = Color3.fromRGB(180, 180, 180),
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, i * 10 + (i % 2 == 0 and 0 or 5), 0, i % 2 == 0 and 0 or 5),
-                    Size = UDim2.new(0, 5, 0, 5),
-                    ZIndex = 10003
-                })
-            end
-            
-            -- Alpha slider fill (shows color fading to transparent)
-            local alphaSliderFill = create("Frame", {
-                Parent = alphaSliderBg,
-                BackgroundColor3 = currentColor,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0),
-                ZIndex = 10004
-            })
-            
-            create("UICorner", {
-                Parent = alphaSliderFill,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            create("UIGradient", {
-                Parent = alphaSliderFill,
-                Transparency = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0),
-                    NumberSequenceKeypoint.new(1, 1)
-                })
-            })
-            
-            -- Alpha slider cursor
-            local alphaCursor = create("Frame", {
-                Parent = alphaSliderBg,
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BorderSizePixel = 0,
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0),
-                Size = UDim2.new(0, 6, 0, 14),
-                ZIndex = 10005
-            })
-            
-            create("UICorner", {
-                Parent = alphaCursor,
-                CornerRadius = UDim.new(0, 2)
-            })
-            
-            create("UIStroke", {
-                Parent = alphaCursor,
-                Color = Color3.new(0, 0, 0),
-                Thickness = 1
-            })
-            
-            -- Alpha slider interaction
-            local draggingAlpha = false
-            
-            alphaSliderBg.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingAlpha = true
-                    local relX = math.clamp((input.Position.X - alphaSliderBg.AbsolutePosition.X) / alphaSliderBg.AbsoluteSize.X, 0, 1)
-                    currentAlpha = 1 - relX
-                    alphaCursor.Position = UDim2.new(relX, 0, 0.5, 0)
-                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
-                    if callback then callback(currentColor, currentAlpha) end
-                end
-            end)
-            
-            alphaSliderBg.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingAlpha = false
-                end
-            end)
-            
-            -- Shared clipboard for colors (stored in window scope)
-            if not window._colorClipboard then
-                window._colorClipboard = nil
-            end
-            
-            if not window._alphaClipboard then
-                window._alphaClipboard = 0
-            end
-            
-            copyBtn.MouseEnter:Connect(function()
-                tween(copyBtn, {BackgroundColor3 = Theme.ElementHover})
-            end)
-            copyBtn.MouseLeave:Connect(function()
-                tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
-            end)
-            
-            pasteBtn.MouseEnter:Connect(function()
-                tween(pasteBtn, {BackgroundColor3 = Theme.ElementHover})
-            end)
-            pasteBtn.MouseLeave:Connect(function()
-                tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
-            end)
-            
-            local function copyColor()
-                window._colorClipboard = currentColor
-                window._alphaClipboard = currentAlpha
-                copyBtn.Text = "✓"
-                tween(copyBtn, {BackgroundColor3 = Theme.Accent})
-                task.delay(0.5, function()
-                    copyBtn.Text = "Copy"
-                    tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
-                end)
-            end
-            
-            local function pasteColor()
-                if window._colorClipboard then
-                    currentColor = window._colorClipboard
-                    currentAlpha = window._alphaClipboard or 0
-                    local newHue, newSat, newVal = currentColor:ToHSV()
-                    -- Preserve hue for achromatic colors
-                    if newSat > 0.01 then currentHue = newHue end
-                    currentSat = newSat
-                    currentVal = newVal
-                    
-                    satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
-                    hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
-                    colorPreview.BackgroundColor3 = currentColor
-                    cursorInner.BackgroundColor3 = currentColor
-                    alphaSliderFill.BackgroundColor3 = currentColor
-                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
-                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
-                    
-                    local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
-                    hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
-                    hexInput.Text = hexLabel.Text
-                    rInput.Text = tostring(r)
-                    gInput.Text = tostring(g)
-                    bInput.Text = tostring(b)
-                    
-                    pasteBtn.Text = "✓"
-                    tween(pasteBtn, {BackgroundColor3 = Theme.Accent})
-                    task.delay(0.5, function()
-                        pasteBtn.Text = "Paste"
-                        tween(pasteBtn, {BackgroundColor3 = Theme.Toggle})
-                    end)
-                    
-                    if callback then callback(currentColor, currentAlpha) end
-                end
-            end
-            
-            copyBtn.MouseButton1Click:Connect(copyColor)
-            pasteBtn.MouseButton1Click:Connect(pasteColor)
-            
-            -- Update function for color changes
-            local function updateColor()
-                currentColor = Color3.fromHSV(currentHue, currentSat, currentVal)
-                colorPreview.BackgroundColor3 = currentColor
-                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                alphaSliderFill.BackgroundColor3 = currentColor
-                
-                -- Update cursor inner color to show selected color
-                cursorInner.BackgroundColor3 = currentColor
-                
-                local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
-                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
-                hexInput.Text = hexLabel.Text
-                rInput.Text = tostring(r)
-                gInput.Text = tostring(g)
-                bInput.Text = tostring(b)
-                
-                if callback then callback(currentColor, currentAlpha) end
-            end
-            
-            -- Sat/Val picker interaction
-            local draggingSatVal = false
-            
-            satValPicker.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingSatVal = true
-                end
-            end)
-            
-            satValPicker.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingSatVal = false
-                end
-            end)
-            
-            valOverlay.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingSatVal = true
-                end
-            end)
-            
-            valOverlay.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingSatVal = false
-                end
-            end)
-            
-            -- Hue slider interaction
-            local draggingHue = false
-            
-            hueSlider.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingHue = true
-                end
-            end)
-            
-            hueSlider.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    draggingHue = false
-                end
-            end)
-            
-            UserInputService.InputChanged:Connect(function(input)
-                if not pickerOpen then return end -- Only process when picker is open
-                
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    if draggingSatVal then
-                        local pos = input.Position
-                        local relX = math.clamp((pos.X - satValPicker.AbsolutePosition.X) / satValPicker.AbsoluteSize.X, 0, 1)
-                        local relY = math.clamp((pos.Y - satValPicker.AbsolutePosition.Y) / satValPicker.AbsoluteSize.Y, 0, 1)
-                        
-                        currentSat = relX
-                        currentVal = 1 - relY
-                        satValCursor.Position = UDim2.new(relX, 0, relY, 0)
-                        updateColor()
-                    end
-                    
-                    if draggingHue then
-                        local pos = input.Position
-                        local relY = math.clamp((pos.Y - hueSlider.AbsolutePosition.Y) / hueSlider.AbsoluteSize.Y, 0, 1)
-                        
-                        currentHue = relY
-                        hueCursor.Position = UDim2.new(0.5, 0, relY, 0)
-                        updateColor()
-                    end
-                    
-                    if draggingAlpha then
-                        local pos = input.Position
-                        local relX = math.clamp((pos.X - alphaSliderBg.AbsolutePosition.X) / alphaSliderBg.AbsoluteSize.X, 0, 1)
-                        
-                        currentAlpha = 1 - relX
-                        alphaCursor.Position = UDim2.new(relX, 0, 0.5, 0)
-                        alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
-                        if callback then callback(currentColor, currentAlpha) end
-                    end
-                end
-            end)
-            
-            -- Position picker panel
-            local function updatePickerPosition()
-                local previewPos = colorPreview.AbsolutePosition
-                local previewSize = colorPreview.AbsoluteSize
-                pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 200, 0, previewPos.Y + previewSize.Y + 5)
-            end
-            
-            -- Refresh all visual elements to match current color
-            local function refreshPickerVisuals()
-                -- Use the preview color as the source of truth
-                currentColor = colorPreview.BackgroundColor3
-                local newHue, newSat, newVal = currentColor:ToHSV()
-                
-                -- For achromatic colors (white/gray/black), hue is undefined
-                -- Keep the existing hue to avoid visual jumps, or default to 0 (red)
-                if newSat > 0.01 then
-                    currentHue = newHue
-                end
-                -- If saturation is very low (achromatic), keep currentHue as-is
-                -- but if it's the first time, default to 0
-                if currentHue == nil then currentHue = 0 end
-                
-                currentSat = newSat
-                currentVal = newVal
-                
-                satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
-                hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
-                cursorInner.BackgroundColor3 = currentColor
-                alphaSliderFill.BackgroundColor3 = currentColor
-                alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
-                alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
-                
-                local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
-                hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
-                hexInput.Text = hexLabel.Text
-                rInput.Text = tostring(r)
-                gInput.Text = tostring(g)
-                bInput.Text = tostring(b)
-            end
-            
-            -- Toggle picker on click
-            colorPreview.MouseButton1Click:Connect(function()
-                pickerOpen = not pickerOpen
-                if pickerOpen then
-                    updatePickerPosition()
-                    refreshPickerVisuals()
-                end
-                pickerPanel.Visible = pickerOpen
-            end)
-            
-            -- Right-click to copy color
-            colorPreview.MouseButton2Click:Connect(function()
-                if pickerOpen then
-                    pasteColor()
-                else
-                    copyColor()
-                end
-            end)
-            
-            -- Close picker when clicking elsewhere
-            UserInputService.InputBegan:Connect(function(input)
-                if pickerOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    local mousePos = input.Position
-                    local panelPos = pickerPanel.AbsolutePosition
-                    local panelSize = pickerPanel.AbsoluteSize
-                    local previewPos = colorPreview.AbsolutePosition
-                    local previewSize = colorPreview.AbsoluteSize
-                    
-                    local inPanel = mousePos.X >= panelPos.X and mousePos.X <= panelPos.X + panelSize.X and
-                                    mousePos.Y >= panelPos.Y and mousePos.Y <= panelPos.Y + panelSize.Y
-                    local inPreview = mousePos.X >= previewPos.X and mousePos.X <= previewPos.X + previewSize.X and
-                                      mousePos.Y >= previewPos.Y and mousePos.Y <= previewPos.Y + previewSize.Y
-                    
-                    if not inPanel and not inPreview then
-                        pickerOpen = false
-                        pickerPanel.Visible = false
-                    end
-                end
-            end)
-            
-            -- Hover effects
-            colorPreview.MouseEnter:Connect(function()
-                tween(colorPreview:FindFirstChildOfClass("UIStroke"), {Color = Theme.Accent})
-            end)
-            
-            colorPreview.MouseLeave:Connect(function()
-                tween(colorPreview:FindFirstChildOfClass("UIStroke"), {Color = Theme.Border})
-            end)
-            
-            return {
-                Set = function(color, alpha)
-                    currentColor = color
-                    if alpha then currentAlpha = alpha end
-                    local newHue, newSat, newVal = currentColor:ToHSV()
-                    -- Preserve hue for achromatic colors
-                    if newSat > 0.01 then currentHue = newHue end
-                    currentSat = newSat
-                    currentVal = newVal
-                    colorPreview.BackgroundColor3 = currentColor
-                    satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
-                    satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
-                    hueCursor.Position = UDim2.new(0.5, 0, currentHue, 0)
-                    cursorInner.BackgroundColor3 = currentColor
-                    alphaSliderFill.BackgroundColor3 = currentColor
-                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
-                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
-                    
-                    local r, g, b = math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)
-                    hexLabel.Text = string.format("#%02X%02X%02X", r, g, b)
-                    hexInput.Text = hexLabel.Text
-                    rInput.Text = tostring(r)
-                    gInput.Text = tostring(g)
-                    bInput.Text = tostring(b)
-                end,
-                Get = function()
-                    return currentColor, currentAlpha
-                end,
-                GetAlpha = function()
-                    return currentAlpha
-                end,
-                SetAlpha = function(alpha)
-                    currentAlpha = alpha
-                    alphaCursor.Position = UDim2.new(1 - currentAlpha, 0, 0.5, 0)
-                    alphaValueLabel.Text = tostring(math.floor((1 - currentAlpha) * 100)) .. "%"
                 end
             }
         end
