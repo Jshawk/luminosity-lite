@@ -1089,7 +1089,7 @@ function LUI:CreateWindow(title)
                 Parent = contentFrame,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 30),
+                Size = UDim2.new(1, 0, 0, 35),
                 ClipsDescendants = false,
                 ZIndex = 10
             })
