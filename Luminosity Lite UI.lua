@@ -1192,7 +1192,11 @@ function LUI:CreateWindow(title)
         
         function tab:AddColorPicker(text, default, callback, defaultAlpha)
             local currentColor = default or Color3.fromRGB(255, 255, 255)
-            local currentHue, currentSat, currentVal = currentColor:ToHSV()
+            local initHue, initSat, initVal = currentColor:ToHSV()
+            -- For achromatic colors (white/gray/black), hue is undefined - default to 0 (red)
+            local currentHue = (initSat > 0.01) and initHue or 0
+            local currentSat = initSat
+            local currentVal = initVal
             local currentAlpha = defaultAlpha or 0 -- 0 = fully opaque, 1 = fully transparent
             local pickerOpen = false
             local copiedColor = nil -- Static variable for copied color
@@ -1503,7 +1507,11 @@ function LUI:CreateWindow(title)
                 local g = tonumber(gInput.Text) or 0
                 local b = tonumber(bInput.Text) or 0
                 currentColor = Color3.fromRGB(r, g, b)
-                currentHue, currentSat, currentVal = currentColor:ToHSV()
+                local newHue, newSat, newVal = currentColor:ToHSV()
+                -- Preserve hue for achromatic colors
+                if newSat > 0.01 then currentHue = newHue end
+                currentSat = newSat
+                currentVal = newVal
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
                 satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
@@ -1578,7 +1586,11 @@ function LUI:CreateWindow(title)
                     local b = tonumber(hex:sub(5, 6), 16)
                     if r and g and b then
                         currentColor = Color3.fromRGB(r, g, b)
-                        currentHue, currentSat, currentVal = currentColor:ToHSV()
+                        local newHue, newSat, newVal = currentColor:ToHSV()
+                        -- Preserve hue for achromatic colors
+                        if newSat > 0.01 then currentHue = newHue end
+                        currentSat = newSat
+                        currentVal = newVal
                         
                         satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
                         satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
@@ -1816,7 +1828,11 @@ function LUI:CreateWindow(title)
                 if window._colorClipboard then
                     currentColor = window._colorClipboard
                     currentAlpha = window._alphaClipboard or 0
-                    currentHue, currentSat, currentVal = currentColor:ToHSV()
+                    local newHue, newSat, newVal = currentColor:ToHSV()
+                    -- Preserve hue for achromatic colors
+                    if newSat > 0.01 then currentHue = newHue end
+                    currentSat = newSat
+                    currentVal = newVal
                     
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
                     satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
@@ -1911,6 +1927,8 @@ function LUI:CreateWindow(title)
             end)
             
             UserInputService.InputChanged:Connect(function(input)
+                if not pickerOpen then return end -- Only process when picker is open
+                
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
                     if draggingSatVal then
                         local pos = input.Position
@@ -1955,7 +1973,19 @@ function LUI:CreateWindow(title)
             local function refreshPickerVisuals()
                 -- Use the preview color as the source of truth
                 currentColor = colorPreview.BackgroundColor3
-                currentHue, currentSat, currentVal = currentColor:ToHSV()
+                local newHue, newSat, newVal = currentColor:ToHSV()
+                
+                -- For achromatic colors (white/gray/black), hue is undefined
+                -- Keep the existing hue to avoid visual jumps, or default to 0 (red)
+                if newSat > 0.01 then
+                    currentHue = newHue
+                end
+                -- If saturation is very low (achromatic), keep currentHue as-is
+                -- but if it's the first time, default to 0
+                if currentHue == nil then currentHue = 0 end
+                
+                currentSat = newSat
+                currentVal = newVal
                 
                 satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
                 satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
@@ -2026,7 +2056,11 @@ function LUI:CreateWindow(title)
                 Set = function(color, alpha)
                     currentColor = color
                     if alpha then currentAlpha = alpha end
-                    currentHue, currentSat, currentVal = currentColor:ToHSV()
+                    local newHue, newSat, newVal = currentColor:ToHSV()
+                    -- Preserve hue for achromatic colors
+                    if newSat > 0.01 then currentHue = newHue end
+                    currentSat = newSat
+                    currentVal = newVal
                     colorPreview.BackgroundColor3 = currentColor
                     satValPicker.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
                     satValCursor.Position = UDim2.new(math.max(0.001, currentSat), 0, math.max(0.001, 1 - currentVal), 0)
