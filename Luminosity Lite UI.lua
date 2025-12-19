@@ -1165,7 +1165,7 @@ function LUI:CreateWindow(title)
                 Parent = screenGui,
                 BackgroundColor3 = Theme.Element,
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 220, 0, 250),
+                Size = UDim2.new(0, 200, 0, 230),
                 Visible = false,
                 ZIndex = 10000
             })
@@ -1178,7 +1178,7 @@ function LUI:CreateWindow(title)
             
             create("UICorner", {
                 Parent = pickerPanel,
-                CornerRadius = UDim.new(0, 4)
+                CornerRadius = UDim.new(0, 6)
             })
             
             -- Saturation/Brightness gradient selector
@@ -1186,7 +1186,7 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Color3.fromHSV(hue, 1, 1),
                 Position = UDim2.new(0, 8, 0, 8),
-                Size = UDim2.new(0, 160, 0, 120),
+                Size = UDim2.new(0, 156, 0, 110),
                 ZIndex = 10001
             })
             
@@ -1271,14 +1271,14 @@ function LUI:CreateWindow(title)
             local hueSliderBg = create("Frame", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                Position = UDim2.new(0, 176, 0, 8),
-                Size = UDim2.new(0, 16, 0, 120),
+                Position = UDim2.new(0, 172, 0, 8),
+                Size = UDim2.new(0, 20, 0, 110),
                 ZIndex = 10001
             })
             
             create("UICorner", {
                 Parent = hueSliderBg,
-                CornerRadius = UDim.new(0, 4)
+                CornerRadius = UDim.new(0, 6)
             })
             
             create("UIGradient", {
@@ -1320,11 +1320,11 @@ function LUI:CreateWindow(title)
             local transparencyLabel = create("TextLabel", {
                 Parent = pickerPanel,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 8, 0, 132),
-                Size = UDim2.new(0, 70, 0, 16),
+                Position = UDim2.new(0, 8, 0, 122),
+                Size = UDim2.new(0, 80, 0, 14),
                 Font = Enum.Font.SourceSans,
                 Text = "Transparency",
-                TextColor3 = Theme.Text,
+                TextColor3 = Theme.TextDark,
                 TextSize = 11,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 ZIndex = 10001
@@ -1333,14 +1333,14 @@ function LUI:CreateWindow(title)
             local transparencySliderBg = create("Frame", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                Position = UDim2.new(0, 8, 0, 148),
-                Size = UDim2.new(0, 184, 0, 12),
+                Position = UDim2.new(0, 8, 0, 136),
+                Size = UDim2.new(0, 184, 0, 14),
                 ZIndex = 10001
             })
             
             create("UICorner", {
                 Parent = transparencySliderBg,
-                CornerRadius = UDim.new(0, 4)
+                CornerRadius = UDim.new(0, 6)
             })
             
             -- Checkerboard for transparency slider
@@ -1401,28 +1401,15 @@ function LUI:CreateWindow(title)
             })
             
             -- RGB input row
-            local rgbLabel = create("TextLabel", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 8, 0, 170),
-                Size = UDim2.new(0, 30, 0, 20),
-                Font = Enum.Font.SourceSans,
-                Text = "RGB",
-                TextColor3 = Theme.Text,
-                TextSize = 12,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = 10005
-            })
-            
             local rInput = create("TextBox", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 38, 0, 170),
-                Size = UDim2.new(0, 40, 0, 20),
+                Position = UDim2.new(0, 8, 0, 158),
+                Size = UDim2.new(0, 44, 0, 22),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.R * 255)),
-                TextColor3 = Color3.fromRGB(255, 100, 100),
+                TextColor3 = Color3.fromRGB(255, 120, 120),
                 PlaceholderText = "R",
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 12,
@@ -1439,11 +1426,11 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 82, 0, 170),
-                Size = UDim2.new(0, 40, 0, 20),
+                Position = UDim2.new(0, 56, 0, 158),
+                Size = UDim2.new(0, 44, 0, 22),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.G * 255)),
-                TextColor3 = Color3.fromRGB(100, 255, 100),
+                TextColor3 = Color3.fromRGB(120, 255, 120),
                 PlaceholderText = "G",
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 12,
@@ -1460,11 +1447,11 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 126, 0, 170),
-                Size = UDim2.new(0, 40, 0, 20),
+                Position = UDim2.new(0, 104, 0, 158),
+                Size = UDim2.new(0, 44, 0, 22),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor(currentColor.B * 255)),
-                TextColor3 = Color3.fromRGB(100, 100, 255),
+                TextColor3 = Color3.fromRGB(120, 120, 255),
                 PlaceholderText = "B",
                 PlaceholderColor3 = Theme.TextDark,
                 TextSize = 12,
@@ -1477,31 +1464,19 @@ function LUI:CreateWindow(title)
                 CornerRadius = UDim.new(0, 4)
             })
             
-            -- Transparency value display
-            local alphaLabel = create("TextLabel", {
-                Parent = pickerPanel,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 170, 0, 170),
-                Size = UDim2.new(0, 14, 0, 20),
-                Font = Enum.Font.SourceSans,
-                Text = "A",
-                TextColor3 = Theme.TextDark,
-                TextSize = 12,
-                ZIndex = 10005
-            })
-            
+            -- Alpha input
             local alphaInput = create("TextBox", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 182, 0, 170),
-                Size = UDim2.new(0, 30, 0, 20),
+                Position = UDim2.new(0, 152, 0, 158),
+                Size = UDim2.new(0, 40, 0, 22),
                 Font = Enum.Font.Code,
                 Text = tostring(math.floor((1 - currentTransparency) * 100)) .. "%",
                 TextColor3 = Theme.Text,
-                PlaceholderText = "100%",
+                PlaceholderText = "A",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 10,
+                TextSize = 11,
                 ClearTextOnFocus = true,
                 ZIndex = 10005
             })
@@ -1511,19 +1486,19 @@ function LUI:CreateWindow(title)
                 CornerRadius = UDim.new(0, 4)
             })
             
-            -- Hex/RGB input and buttons row
+            -- Hex input and buttons row
             local hexInput = create("TextBox", {
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 8, 0, 200),
-                Size = UDim2.new(0, 80, 0, 22),
+                Position = UDim2.new(0, 8, 0, 188),
+                Size = UDim2.new(0, 88, 0, 24),
                 Font = Enum.Font.Code,
                 Text = "#" .. string.format("%02X%02X%02X", math.floor(currentColor.R * 255), math.floor(currentColor.G * 255), math.floor(currentColor.B * 255)),
                 TextColor3 = Theme.Text,
                 PlaceholderText = "#FFFFFF",
                 PlaceholderColor3 = Theme.TextDark,
-                TextSize = 11,
+                TextSize = 12,
                 ClearTextOnFocus = false,
                 ZIndex = 10005
             })
@@ -1536,13 +1511,13 @@ function LUI:CreateWindow(title)
             -- Copy button
             local copyBtn = create("TextButton", {
                 Parent = pickerPanel,
-                BackgroundColor3 = Theme.Toggle,
+                BackgroundColor3 = Theme.Accent,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 92, 0, 200),
-                Size = UDim2.new(0, 48, 0, 22),
-                Font = Enum.Font.SourceSans,
+                Position = UDim2.new(0, 100, 0, 188),
+                Size = UDim2.new(0, 44, 0, 24),
+                Font = Enum.Font.SourceSansSemibold,
                 Text = "Copy",
-                TextColor3 = Theme.Text,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
                 TextSize = 11,
                 AutoButtonColor = false,
                 ZIndex = 10005
@@ -1558,9 +1533,9 @@ function LUI:CreateWindow(title)
                 Parent = pickerPanel,
                 BackgroundColor3 = Theme.Toggle,
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, 144, 0, 200),
-                Size = UDim2.new(0, 48, 0, 22),
-                Font = Enum.Font.SourceSans,
+                Position = UDim2.new(0, 148, 0, 188),
+                Size = UDim2.new(0, 44, 0, 24),
+                Font = Enum.Font.SourceSansSemibold,
                 Text = "Paste",
                 TextColor3 = Theme.Text,
                 TextSize = 11,
@@ -1758,11 +1733,11 @@ function LUI:CreateWindow(title)
             end)
             
             copyBtn.MouseEnter:Connect(function()
-                tween(copyBtn, {BackgroundColor3 = Theme.ElementHover})
+                tween(copyBtn, {BackgroundColor3 = Theme.AccentDark})
             end)
             
             copyBtn.MouseLeave:Connect(function()
-                tween(copyBtn, {BackgroundColor3 = Theme.Toggle})
+                tween(copyBtn, {BackgroundColor3 = Theme.Accent})
             end)
             
             -- Paste button
@@ -1798,7 +1773,7 @@ function LUI:CreateWindow(title)
             local function updatePanelPosition()
                 local previewPos = colorPreview.AbsolutePosition
                 local previewSize = colorPreview.AbsoluteSize
-                pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 220, 0, previewPos.Y + previewSize.Y + 4)
+                pickerPanel.Position = UDim2.new(0, previewPos.X + previewSize.X - 200, 0, previewPos.Y + previewSize.Y + 4)
             end
             
             -- Toggle picker panel
