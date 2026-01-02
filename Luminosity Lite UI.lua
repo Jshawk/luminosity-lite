@@ -1,8 +1,8 @@
--- LUI - Lightweight UI Library for Roblox
--- External Style Edition
+-- Luminosity UI Library
 
-local LUI = {}
-LUI.__index = LUI
+
+local LuminosityUI = {}
+LuminosityUI.__index = LuminosityUI
 
 -- Services
 local Players = game:GetService("Players")
@@ -11,22 +11,22 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 
--- Cleanup: Remove any existing LUI instances before creating new one
+-- Cleanup: Remove any existing LuminosityUI instances before creating new one
 for _, gui in ipairs(CoreGui:GetChildren()) do
-    if gui:IsA("ScreenGui") and gui.Name:sub(1, 4) == "LUI_" then
+    if gui:IsA("ScreenGui") and gui.Name:sub(1, 4) == "LuminosityUI_" then
         gui:Destroy()
     end
 end
 
 -- Also cleanup any global connections from previous execution
-if _G.LUI_Connections then
-    for _, connection in pairs(_G.LUI_Connections) do
+if _G.LuminosityUI_Connections then
+    for _, connection in pairs(_G.LuminosityUI_Connections) do
         if typeof(connection) == "RBXScriptConnection" then
             connection:Disconnect()
         end
     end
 end
-_G.LUI_Connections = {}
+_G.LuminosityUI_Connections = {}
 
 -- Theme Presets
 local ThemePresets = {
@@ -141,13 +141,13 @@ local function applyTheme(themeName)
 end
 
 -- Main Library
-function LUI:CreateWindow(title)
+function LuminosityUI:CreateWindow(title)
     local window = {}
     local menuVisible = true
     
     -- Main GUI
     local screenGui = create("ScreenGui", {
-        Name = "LUI_" .. title,
+        Name = "LuminosityUI_" .. title,
         Parent = CoreGui,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         ResetOnSpawn = false
@@ -2091,7 +2091,7 @@ function LUI:CreateWindow(title)
     -- Apply theme function (updates all UI colors)
     function window:SetTheme(themeName)
         if not ThemePresets[themeName] then 
-            warn("LUI: Invalid theme name: " .. tostring(themeName))
+            warn("LuminosityUI: Invalid theme name: " .. tostring(themeName))
             return false 
         end
         
@@ -2241,4 +2241,4 @@ function LUI:CreateWindow(title)
     return window
 end
 
-return LUI
+return LuminosityUI
