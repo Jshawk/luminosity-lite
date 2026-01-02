@@ -2034,34 +2034,44 @@ function LuminosityUI:CreateWindow(title)
     end)
     
     -- Menu toggle keybind (Insert or RightShift to show/hide)
+
     window:SetToggleKey(menuToggleKey)
-    
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == toggleKey then
-            menuVisible = not menuVisible
-            if menuVisible then
-                -- Simple fade in
-                mainFrame.Visible = true
-                mainFrame.BackgroundTransparency = 1
-                mainStroke.Transparency = 1
-                tween(mainFrame, {BackgroundTransparency = 0}, 0.2)
-                tween(mainStroke, {Transparency = 0}, 0.2)
-            else
-                -- Fade out
-                tween(mainFrame, {BackgroundTransparency = 1}, 0.15)
-                tween(mainStroke, {Transparency = 1}, 0.15)
-                task.delay(0.15, function()
-                    if not menuVisible then
-                        mainFrame.Visible = false
-                    end
-                end)
-            end
+
+    -- Store the connection so we can disconnect/reconnect
+    local menuToggleConnection
+    local function connectMenuToggle()
+        if menuToggleConnection then
+            menuToggleConnection:Disconnect()
         end
-    end)
-    
+        menuToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == toggleKey then
+                menuVisible = not menuVisible
+                if menuVisible then
+                    -- Simple fade in
+                    mainFrame.Visible = true
+                    mainFrame.BackgroundTransparency = 1
+                    mainStroke.Transparency = 1
+                    tween(mainFrame, {BackgroundTransparency = 0}, 0.2)
+                    tween(mainStroke, {Transparency = 0}, 0.2)
+                else
+                    -- Fade out
+                    tween(mainFrame, {BackgroundTransparency = 1}, 0.15)
+                    tween(mainStroke, {Transparency = 1}, 0.15)
+                    task.delay(0.15, function()
+                        if not menuVisible then
+                            mainFrame.Visible = false
+                        end
+                    end)
+                end
+            end
+        end)
+    end
+    connectMenuToggle()
+
     -- Set toggle key function
     function window:SetToggleKey(key)
         toggleKey = key
+        connectMenuToggle()
     end
     
     -- Set watermark position ("left" or "right")
