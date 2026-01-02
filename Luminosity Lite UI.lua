@@ -2034,7 +2034,7 @@ function LuminosityUI:CreateWindow(title)
     end)
     
     -- Menu toggle keybind (Insert or RightShift to show/hide)
-    local toggleKey = Enum.KeyCode.RightShift
+    window:SetToggleKey(menuToggleKey)
     
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if not gameProcessed and input.KeyCode == toggleKey then
