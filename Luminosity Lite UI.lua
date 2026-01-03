@@ -145,8 +145,6 @@ function LuminosityUI:CreateWindow(title)
     local window = {}
     local menuVisible = true
     
-    local menuToggleKey = Enum.KeyCode.RightShift
-
     -- Main GUI
     local screenGui = create("ScreenGui", {
         Name = "LuminosityUI_" .. title,
@@ -2076,6 +2074,8 @@ function LuminosityUI:CreateWindow(title)
         toggleKey = key
         connectMenuToggle()
     end
+
+    local SetToggleKey = Enum.KeyCode.RightShift
     
     -- Set watermark position ("left" or "right")
     function window:SetWatermarkPosition(position)
