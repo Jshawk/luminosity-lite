@@ -2038,8 +2038,6 @@ local menuToggleKey = Enum.KeyCode.RightShift
     
     -- Menu toggle keybind (Insert or RightShift to show/hide)
 
-    window:SetToggleKey(menuToggleKey)
-
     -- Store the connection so we can disconnect/reconnect
     local menuToggleConnection
     local function connectMenuToggle()
