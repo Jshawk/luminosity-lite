@@ -1037,13 +1037,16 @@ function LuminosityUI:CreateWindow(title)
                     listening = false
                     keybind = input.KeyCode
                     keyBtn.Text = keybind.Name
+                    if callback then callback(keybind) end -- Call callback with new key
                 end
                 
                 if not gameProcessed and input.KeyCode == keybind and callback then
-                    callback()
+                    callback(keybind)
                 end
             end)
             
+local menuToggleKey = Enum.KeyCode.RightShift
+
             return {
                 Set = function(key)
                     keybind = key
