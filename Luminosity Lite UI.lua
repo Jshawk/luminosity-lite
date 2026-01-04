@@ -855,8 +855,8 @@ function LuminosityUI:CreateWindow(title)
             
             local function updateSlider(input)
                 local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-                value = math.floor(min + (max - min) * pos)
-                valueLabel.Text = tostring(value)
+                value = min + (max - min) * pos
+                valueLabel.Text = string.format("%.2f", value)
                 tween(sliderFill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.05)
                 if callback then callback(value) end
             end
@@ -883,7 +883,7 @@ function LuminosityUI:CreateWindow(title)
             return {
                 Set = function(newValue)
                     value = math.clamp(newValue, min, max)
-                    valueLabel.Text = tostring(value)
+                    valueLabel.Text = string.format("%.2f", value)
                     sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
                 end,
                 Get = function()
