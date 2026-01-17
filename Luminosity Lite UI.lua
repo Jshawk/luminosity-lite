@@ -202,9 +202,8 @@ function LuminosityUI:CreateWindow(title)
         lastUpdate = lastUpdate + 1
         if lastUpdate >= 30 then -- Update every ~0.5 sec
             lastUpdate = 0
-            local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
             local fps = math.floor(1 / RunService.Heartbeat:Wait())
-            watermarkText.Text = game.Players.LocalPlayer.Name .. " | " .. string.upper(title) .. " | " .. ping .. "ms | " .. fps .. "fps"
+            watermarkText.Text = game.Players.LocalPlayer.Name .. " | " .. string.upper(title) .. " | " .. fps .. "fps"
         end
     end)
     
@@ -855,8 +854,8 @@ function LuminosityUI:CreateWindow(title)
             
             local function updateSlider(input)
                 local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-                value = min + (max - min) * pos
-                valueLabel.Text = string.format("%.2f", value)
+                value = math.floor(min + (max - min) * pos)
+                valueLabel.Text = tostring(value)
                 tween(sliderFill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.05)
                 if callback then callback(value) end
             end
@@ -883,7 +882,7 @@ function LuminosityUI:CreateWindow(title)
             return {
                 Set = function(newValue)
                     value = math.clamp(newValue, min, max)
-                    valueLabel.Text = string.format("%.2f", value)
+                    valueLabel.Text = tostring(value)
                     sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
                 end,
                 Get = function()
